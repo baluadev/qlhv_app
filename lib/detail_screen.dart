@@ -1,3 +1,5 @@
+import 'package:drop_down_list/drop_down_list.dart';
+import 'package:drop_down_list/model/selected_list_item.dart';
 import 'package:flutter/material.dart';
 import 'package:qlhv_app/models/profile_model.dart';
 
@@ -12,7 +14,6 @@ class _DetailScreenState extends State<DetailScreen> {
   List<TextEditingController> controllers =
       List.generate(14, (index) => TextEditingController());
 
-      
   late ProfileModel profile;
   @override
   void initState() {
@@ -52,6 +53,34 @@ class _DetailScreenState extends State<DetailScreen> {
     super.dispose();
   }
 
+  void onTextFieldTap() {
+    DropDownState<String>(
+      dropDown: DropDown<String>(
+        data: <SelectedListItem<String>>[
+          SelectedListItem<String>(data: 'Tokyo'),
+          SelectedListItem<String>(data: 'New York'),
+          SelectedListItem<String>(data: 'London'),
+        ],
+        onSelected: (selectedItems) {
+          List<String> list = [];
+          for (var item in selectedItems) {
+            list.add(item.data);
+          }
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                list.toString(),
+              ),
+            ),
+          );
+        },
+      ),
+    ).showModal(context);
+  }
+
+  final TextEditingController _nameTextEditingController =
+      TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     final enabledBorder = OutlineInputBorder();
@@ -60,9 +89,6 @@ class _DetailScreenState extends State<DetailScreen> {
       fontSize: 16,
       fontWeight: FontWeight.bold,
     );
-
-    final profile = ModalRoute.of(context)!.settings.arguments as ProfileModel;
-    print(profile.toString());
 
     return Scaffold(
       appBar: AppBar(
@@ -193,6 +219,13 @@ class _DetailScreenState extends State<DetailScreen> {
                     }
                   },
                 ),
+              ),
+              AppTextField(
+                textEditingController: _nameTextEditingController,
+                title: 'Naem',
+                hint: 'Kanem',
+                isReadOnly: true,
+                onTextFieldTap: onTextFieldTap,
               ),
             ],
           ),
@@ -380,6 +413,71 @@ class _DetailScreenState extends State<DetailScreen> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class AppTextField extends StatefulWidget {
+  final TextEditingController textEditingController;
+  final String title;
+  final String hint;
+  final bool isReadOnly;
+  final VoidCallback? onTextFieldTap;
+
+  const AppTextField({
+    required this.textEditingController,
+    required this.title,
+    required this.hint,
+    this.isReadOnly = false,
+    this.onTextFieldTap,
+    super.key,
+  });
+
+  @override
+  State<AppTextField> createState() => _AppTextFieldState();
+}
+
+class _AppTextFieldState extends State<AppTextField> {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(widget.title),
+        const SizedBox(height: 5.0),
+        TextFormField(
+          controller: widget.textEditingController,
+          cursorColor: Colors.black,
+          readOnly: widget.isReadOnly,
+          onTap: widget.isReadOnly
+              ? () {
+                  FocusScope.of(context).unfocus();
+                  widget.onTextFieldTap?.call();
+                }
+              : null,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.black12,
+            contentPadding: const EdgeInsets.only(
+              left: 8,
+              bottom: 0,
+              top: 0,
+              right: 15,
+            ),
+            hintText: widget.hint,
+            border: const OutlineInputBorder(
+              borderSide: BorderSide(
+                width: 0,
+                style: BorderStyle.none,
+              ),
+              borderRadius: BorderRadius.all(
+                Radius.circular(8.0),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 15.0),
+      ],
     );
   }
 }
