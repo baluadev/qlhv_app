@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:qlhv_app/models/profile_model.dart';
 
 class DetailScreen extends StatefulWidget {
   const DetailScreen({super.key});
@@ -11,9 +12,38 @@ class _DetailScreenState extends State<DetailScreen> {
   List<TextEditingController> controllers =
       List.generate(14, (index) => TextEditingController());
 
+      
+  late ProfileModel profile;
   @override
   void initState() {
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // Lấy arguments từ route
+    final args = ModalRoute.of(context)!.settings.arguments;
+    if (args is ProfileModel) {
+      profile = args;
+
+      // Gán dữ liệu từ ProfileModel vào controllers
+      controllers[0].text = profile.hovaten ?? "";
+      controllers[1].text = profile.ngaysinh ?? "";
+      controllers[2].text = profile.cccd ?? "";
+      controllers[3].text = profile.sdt ?? "";
+      controllers[4].text = profile.diachi ?? "";
+      controllers[5].text = profile.lophoc ?? "";
+      controllers[6].text = profile.ngaykhaigiang ?? "";
+      controllers[7].text = profile.ngaytaptrung ?? "";
+      controllers[8].text = profile.ngayhockiemtralythuyet ?? "";
+      controllers[9].text = profile.ngayhoccabin ?? "";
+      controllers[10].text = profile.ngayhocvo ?? "";
+      controllers[11].text = profile.ngayhocsahinh ?? "";
+      controllers[12].text = profile.ngayhobotucthem ?? "";
+      controllers[13].text = ""; // ưu đãi 1 (nếu có field riêng thì map luôn)
+    }
   }
 
   @override
@@ -30,6 +60,9 @@ class _DetailScreenState extends State<DetailScreen> {
       fontSize: 16,
       fontWeight: FontWeight.bold,
     );
+
+    final profile = ModalRoute.of(context)!.settings.arguments as ProfileModel;
+    print(profile.toString());
 
     return Scaffold(
       appBar: AppBar(
