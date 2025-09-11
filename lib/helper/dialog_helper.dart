@@ -29,7 +29,7 @@ class DialogHelper {
   }
 
   static Future<void> hideLoading() async {
-    await Future.delayed(const Duration(seconds: 1));
+    await Future.delayed(const Duration(milliseconds: 300));
     back();
   }
 

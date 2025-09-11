@@ -12,6 +12,10 @@ class ProfileModel {
   final String? diachi;
   final String? lophoc;
   final String? ngaykhaigiang;
+  final int? nguonHV;
+  final int? giaovienDAT;
+  final int? xeDAT;
+  final int? loaiHocPhi;
   final String? ngaytaptrung;
   final String? ngayhockiemtralythuyet;
   final String? ngayhoccabin;
@@ -27,6 +31,10 @@ class ProfileModel {
     this.diachi,
     this.lophoc,
     this.ngaykhaigiang,
+    this.nguonHV,
+    this.giaovienDAT,
+    this.xeDAT,
+    this.loaiHocPhi,
     this.ngaytaptrung,
     this.ngayhockiemtralythuyet,
     this.ngayhoccabin,
@@ -44,6 +52,10 @@ class ProfileModel {
       diachi: json['diachi'] as String?,
       lophoc: json['lophoc'] as String?,
       ngaykhaigiang: json['ngaykhaigiang'] as String?,
+      nguonHV: json['nguonHV'] as int?,
+      giaovienDAT: json['giaovienDAT'] as int?,
+      xeDAT: json['xeDAT'] as int?,
+      loaiHocPhi: json['loaiHocPhi'] as int?,
       ngaytaptrung: json['ngaytaptrung'] as String?,
       ngayhockiemtralythuyet: json['ngayhockiemtralythuyet'] as String?,
       ngayhoccabin: json['ngayhoccabin'] as String?,
@@ -62,6 +74,10 @@ class ProfileModel {
       'diachi': diachi,
       'lophoc': lophoc,
       'ngaykhaigiang': ngaykhaigiang,
+      'nguonHV': nguonHV,
+      'giaovienDAT': giaovienDAT,
+      'xeDAT': xeDAT,
+      'loaiHocPhi': loaiHocPhi,
       'ngaytaptrung': ngaytaptrung,
       'ngayhockiemtralythuyet': ngayhockiemtralythuyet,
       'ngayhoccabin': ngayhoccabin,
@@ -98,21 +114,27 @@ class ProfileModel {
 
   Future<List<ProfileModel>> search(String keyword) async {
     final userId = LocalStore.inst.getUser()?.id ?? '';
+    try {
+      final url = Uri.http(
+        Const.baseUrl,
+        'qlhv-car/us-central1/api/profile/search/$userId',
+        {'keyword': keyword}, // query string
+      );
+      print(userId);
+      final resp = await http.get(url);
+      print(resp.body);
+      final data = json.decode(resp.body);
+      if (resp.statusCode != 200) {
+        final message = data['message'] ?? "Có lỗi xảy ra";
+        DialogHelper.showToast(message);
+        return [];
+      }
 
-    final url = Uri.http(
-      Const.baseUrl,
-      'qlhv-car/us-central1/api/profile/search/$userId',
-      {'keyword': keyword}, // query string
-    );
-    final resp = await http.get(url);
-    final data = json.decode(resp.body);
-    if (resp.statusCode != 200) {
-      final message = data['message'] ?? "Có lỗi xảy ra";
-      DialogHelper.showToast(message);
+      final results = data['results'] as List<dynamic>;
+      return results.map((e) => ProfileModel.fromJson(e)).toList();
+    } catch (e) {
+      print(e);
       return [];
     }
-
-    final results = data['results'] as List<dynamic>;
-    return results.map((e) => ProfileModel.fromJson(e)).toList();
   }
 }

@@ -33,7 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void addProfile() {
-    Navigator.pushNamed(context, '/detail');
+    Navigator.pushNamed(context, '/add');
   }
 
   @override
@@ -41,6 +41,12 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        title: const Text(
+          'Tìm kiếm',
+          style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: addProfile,
@@ -59,6 +65,8 @@ class _HomeScreenState extends State<HomeScreen> {
               },
               decoration: InputDecoration(
                 hintText: 'Nhập từ khóa',
+                enabledBorder: const OutlineInputBorder(),
+                focusedBorder: const OutlineInputBorder(),
                 suffixIcon: searchController.text.isNotEmpty
                     ? IconButton(
                         icon: const Icon(Icons.close),
@@ -70,10 +78,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     : null,
               ),
             ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: onSearchChanged,
-              child: const Text('Tìm kiếm'),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: ElevatedButton(
+                onPressed: onSearchChanged,
+                child: const Text(
+                  'Tìm kiếm',
+                  style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black),
+                ),
+              ),
             ),
             Expanded(
               child: ListView.builder(
@@ -81,11 +97,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 itemBuilder: (context, index) {
                   final item = list[index];
                   return ListTile(
+                    shape: const OutlineInputBorder(),
                     onTap: () {
                       Navigator.pushNamed(context, '/detail', arguments: item);
                     },
-                    title: Text(item.hovaten ?? ''),
-                    subtitle: Text(item.sdt ?? ''),
+                    title: Text('Họ và tên: ${item.hovaten}'),
+                    subtitle: Text('SDT: ${item.sdt}'),
+                    trailing: const Icon(Icons.arrow_forward),
                   );
                 },
               ),

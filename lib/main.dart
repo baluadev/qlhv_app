@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:qlhv_app/add_profile_screen.dart';
 import 'package:qlhv_app/detail_screen.dart';
 import 'package:qlhv_app/home.dart';
 import 'package:qlhv_app/login.dart';
@@ -42,6 +43,7 @@ class MyApp extends StatelessWidget {
         '/login': (_) => LoginScreen(userModel: userModel),
         '/home': (_) => const HomeScreen(),
         '/detail': (_) => const DetailScreen(),
+        '/add': (_) => const AddProfileScreen(),
       },
     );
   }
