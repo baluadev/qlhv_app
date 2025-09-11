@@ -1,4 +1,8 @@
 import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:qlhv_app/const.dart';
+import 'package:qlhv_app/helper/dialog_helper.dart';
+import 'package:qlhv_app/services/local_store.dart';
 
 class ProfileModel {
   final String? hovaten;
@@ -70,5 +74,45 @@ class ProfileModel {
   @override
   String toString() {
     return jsonEncode(toJson());
+  }
+
+  Future<bool> add(ProfileModel profile) async {
+    var url = Uri.http(Const.baseUrl, 'qlhv-car/us-central1/api/profile/add');
+    final resp = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        'userId': LocalStore.inst.getUser()?.id ?? '',
+        'profile': profile.toJson(),
+      }),
+    );
+    final data = json.decode(resp.body);
+    if (resp.statusCode != 200) {
+      final message = data['message'];
+      DialogHelper.showToast(message);
+      return false;
+    }
+    await Future.delayed(const Duration(seconds: 1));
+    return true;
+  }
+
+  Future<List<ProfileModel>> search(String keyword) async {
+    final userId = LocalStore.inst.getUser()?.id ?? '';
+
+    final url = Uri.http(
+      Const.baseUrl,
+      'qlhv-car/us-central1/api/profile/search/$userId',
+      {'keyword': keyword}, // query string
+    );
+    final resp = await http.get(url);
+    final data = json.decode(resp.body);
+    if (resp.statusCode != 200) {
+      final message = data['message'] ?? "Có lỗi xảy ra";
+      DialogHelper.showToast(message);
+      return [];
+    }
+
+    final results = data['results'] as List<dynamic>;
+    return results.map((e) => ProfileModel.fromJson(e)).toList();
   }
 }

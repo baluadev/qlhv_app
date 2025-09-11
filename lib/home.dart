@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:qlhv_app/helper/dialog_helper.dart';
 import 'package:qlhv_app/models/profile_model.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -11,47 +13,83 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  Timer? _debounce;
-  void onSearchChanged(String query) {
-    if (_debounce?.isActive ?? false) {
-      _debounce?.cancel();
-      _debounce = Timer(const Duration(milliseconds: 500), () {
-        //fetch
+  List<ProfileModel> list = [];
+  final ProfileModel _profileModel = ProfileModel();
+  final searchController = TextEditingController();
+  void onSearchChanged() async {
+    final query = searchController.text;
+
+    if (query.isEmpty) {
+      setState(() {
+        list = [];
       });
+      return;
     }
+
+    DialogHelper.showLoading();
+    list = await _profileModel.search(query);
+    DialogHelper.hideLoading();
+    setState(() {});
+  }
+
+  void addProfile() {
+    Navigator.pushNamed(context, '/detail');
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: addProfile,
+        tooltip: 'Increment',
+        child: const Icon(Icons.add),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             TextField(
-              onChanged: onSearchChanged,
-              decoration: const InputDecoration(
+              controller: searchController,
+              onChanged: (value) {
+                setState(() {});
+              },
+              decoration: InputDecoration(
                 hintText: 'Nhập từ khóa',
+                suffixIcon: searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () {
+                          searchController.clear();
+                          onSearchChanged();
+                        },
+                      )
+                    : null,
               ),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: onSearchChanged,
               child: const Text('Tìm kiếm'),
             ),
-            Expanded(child: ListView.builder(
-              itemBuilder: (context, index) {
-                return ListTile(
-                  onTap: () {
-                    Navigator.pushNamed(context, '/detail',
-                        arguments: ProfileModel(hovaten: 'ho va ten'));
-                  },
-                  title: Text('list 1'),
-                );
-              },
-            ))
+            Expanded(
+              child: ListView.builder(
+                itemCount: list.length,
+                itemBuilder: (context, index) {
+                  final item = list[index];
+                  return ListTile(
+                    onTap: () {
+                      Navigator.pushNamed(context, '/detail', arguments: item);
+                    },
+                    title: Text(item.hovaten ?? ''),
+                    subtitle: Text(item.sdt ?? ''),
+                  );
+                },
+              ),
+            )
           ],
         ),
       ),

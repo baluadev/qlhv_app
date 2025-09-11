@@ -1,7 +1,10 @@
 import 'package:drop_down_list/drop_down_list.dart';
 import 'package:drop_down_list/model/selected_list_item.dart';
 import 'package:flutter/material.dart';
+import 'package:qlhv_app/const.dart';
+import 'package:qlhv_app/helper/dialog_helper.dart';
 import 'package:qlhv_app/models/profile_model.dart';
+import 'package:qlhv_app/services/local_store.dart';
 
 class DetailScreen extends StatefulWidget {
   const DetailScreen({super.key});
@@ -11,10 +14,14 @@ class DetailScreen extends StatefulWidget {
 }
 
 class _DetailScreenState extends State<DetailScreen> {
+  final ProfileModel _profileModel = ProfileModel();
+
   List<TextEditingController> controllers =
       List.generate(14, (index) => TextEditingController());
+  List<TextEditingController> controllers2 =
+      List.generate(10, (index) => TextEditingController());
+  ProfileModel? profile;
 
-  late ProfileModel profile;
   @override
   void initState() {
     super.initState();
@@ -23,63 +30,53 @@ class _DetailScreenState extends State<DetailScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
     // Lấy arguments từ route
     final args = ModalRoute.of(context)!.settings.arguments;
     if (args is ProfileModel) {
       profile = args;
 
       // Gán dữ liệu từ ProfileModel vào controllers
-      controllers[0].text = profile.hovaten ?? "";
-      controllers[1].text = profile.ngaysinh ?? "";
-      controllers[2].text = profile.cccd ?? "";
-      controllers[3].text = profile.sdt ?? "";
-      controllers[4].text = profile.diachi ?? "";
-      controllers[5].text = profile.lophoc ?? "";
-      controllers[6].text = profile.ngaykhaigiang ?? "";
-      controllers[7].text = profile.ngaytaptrung ?? "";
-      controllers[8].text = profile.ngayhockiemtralythuyet ?? "";
-      controllers[9].text = profile.ngayhoccabin ?? "";
-      controllers[10].text = profile.ngayhocvo ?? "";
-      controllers[11].text = profile.ngayhocsahinh ?? "";
-      controllers[12].text = profile.ngayhobotucthem ?? "";
+      controllers[0].text = profile?.hovaten ?? "";
+      controllers[1].text = profile?.ngaysinh ?? "";
+      controllers[2].text = profile?.cccd ?? "";
+      controllers[3].text = profile?.sdt ?? "";
+      controllers[4].text = profile?.diachi ?? "";
+      controllers[5].text = profile?.lophoc ?? "";
+      controllers[6].text = profile?.ngaykhaigiang ?? "";
+      controllers[7].text = profile?.ngaytaptrung ?? "";
+      controllers[8].text = profile?.ngayhockiemtralythuyet ?? "";
+      controllers[9].text = profile?.ngayhoccabin ?? "";
+      controllers[10].text = profile?.ngayhocvo ?? "";
+      controllers[11].text = profile?.ngayhocsahinh ?? "";
+      controllers[12].text = profile?.ngayhobotucthem ?? "";
       controllers[13].text = ""; // ưu đãi 1 (nếu có field riêng thì map luôn)
+
+
+      //downlist      controllers2[0].text = ""; // Nguồn học viên
+      // controllers2[0].text = profile?; // Nguồn học viên
     }
   }
 
   @override
   void dispose() {
     controllers.map((e) => e.dispose());
+    controllers2.map((e) => e.dispose());
     super.dispose();
   }
 
-  void onTextFieldTap() {
+  void onTextFieldTap(List<String> options, TextEditingController controller) {
     DropDownState<String>(
       dropDown: DropDown<String>(
-        data: <SelectedListItem<String>>[
-          SelectedListItem<String>(data: 'Tokyo'),
-          SelectedListItem<String>(data: 'New York'),
-          SelectedListItem<String>(data: 'London'),
-        ],
+        searchHintText: 'Tìm kiếm',
+        data: options.map((e) => SelectedListItem<String>(data: e)).toList(),
         onSelected: (selectedItems) {
-          List<String> list = [];
-          for (var item in selectedItems) {
-            list.add(item.data);
+          if (selectedItems.isNotEmpty) {
+            controller.text = selectedItems.first.data;
           }
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                list.toString(),
-              ),
-            ),
-          );
         },
       ),
     ).showModal(context);
   }
-
-  final TextEditingController _nameTextEditingController =
-      TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -220,12 +217,49 @@ class _DetailScreenState extends State<DetailScreen> {
                   },
                 ),
               ),
-              AppTextField(
-                textEditingController: _nameTextEditingController,
-                title: 'Naem',
-                hint: 'Kanem',
-                isReadOnly: true,
-                onTextFieldTap: onTextFieldTap,
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: AppTextField(
+                  textEditingController: controllers2[0],
+                  title: 'Nguồn học viên',
+                  hint: 'Chọn nguồn học viên',
+                  isReadOnly: true,
+                  onTextFieldTap: () =>
+                      onTextFieldTap(Const.nguonHocVien, controllers2[0]),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: AppTextField(
+                  textEditingController: controllers2[1],
+                  title: 'Giáo viên dạy DAT',
+                  hint: 'Chọn giáo viên dạy DAT',
+                  isReadOnly: true,
+                  onTextFieldTap: () =>
+                      onTextFieldTap(Const.giaoVienDayDAT, controllers2[1]),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: AppTextField(
+                  textEditingController: controllers2[2],
+                  title: 'Xe dạy DAT',
+                  hint: 'Chọn xe dạy DAT',
+                  isReadOnly: true,
+                  onTextFieldTap: () =>
+                      onTextFieldTap(Const.xeDayDAT, controllers2[2]),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: AppTextField(
+                  textEditingController: controllers2[3],
+                  title: 'Cách thức đóng học phí',
+                  hint: 'Chọn cách thức đóng học phí',
+                  isReadOnly: true,
+                  onTextFieldTap: () =>
+                      onTextFieldTap(Const.cachThucDongHocPhi, controllers2[3]),
+                ),
               ),
             ],
           ),
@@ -413,6 +447,35 @@ class _DetailScreenState extends State<DetailScreen> {
           ),
         ],
       ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: ElevatedButton(
+          onPressed: () async {
+            DialogHelper.showLoading();
+            if (profile == null) {
+              await _profileModel.add(ProfileModel(
+                hovaten: controllers[0].text,
+                ngaysinh: controllers[1].text,
+                cccd: controllers[2].text,
+                sdt: controllers[3].text,
+                diachi: controllers[4].text,
+                lophoc: controllers[5].text,
+                ngaykhaigiang: controllers[6].text,
+                ngaytaptrung: controllers[7].text,
+                ngayhockiemtralythuyet: controllers[8].text,
+                ngayhoccabin: controllers[9].text,
+                ngayhocvo: controllers[10].text,
+                ngayhocsahinh: controllers[11].text,
+                ngayhobotucthem: controllers[12].text,
+              ));
+            } else {}
+            await Future.delayed(const Duration(milliseconds: 300));
+            DialogHelper.hideLoading();
+            Navigator.pop(context);
+          },
+          child: Text(profile == null ? 'Lưu' : 'Cập nhật'),
+        ),
+      ),
     );
   }
 }
@@ -443,7 +506,10 @@ class _AppTextFieldState extends State<AppTextField> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(widget.title),
+        Text(
+          widget.title,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
         const SizedBox(height: 5.0),
         TextFormField(
           controller: widget.textEditingController,

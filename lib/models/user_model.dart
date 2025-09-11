@@ -39,13 +39,7 @@ class UserModel extends ChangeNotifier {
   }
 
   Future<bool> login(username, password) async {
-    //test
-    await Future.delayed(Duration(seconds: 2));
-    await LocalStore.inst.addUser(
-        UserModel(id: '1', username: 'nnn', password: 'ssss').toString());
-    return true;
-
-    var url = Uri.https(Const.baseUrl, 'login');
+    var url = Uri.https(Const.baseUrl, 'api/login');
     final resp = await http.post(url, body: {
       'username': username,
       'password': password,
