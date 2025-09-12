@@ -4,7 +4,8 @@ abstract class HasText {
 
 enum NguonHV implements HasText {
   trungtam,
-  giaovien;
+  giaovien,
+  sosan;
 
   @override
   String get text {
@@ -13,6 +14,8 @@ enum NguonHV implements HasText {
         return 'Nguồn trung tâm';
       case NguonHV.giaovien:
         return 'Nguồn giáo viên';
+      case NguonHV.sosan:
+        return 'Nguồn số sàn';
       default:
         return 'Nguồn trung tâm';
     }
@@ -53,6 +56,7 @@ enum XeDAT implements HasText {
   }
 }
 
+//chỉ hiện thị khi nguồn học viên là giao viên
 enum LoaiHocPhi implements HasText {
   full,
   coban,
@@ -71,4 +75,33 @@ enum LoaiHocPhi implements HasText {
         return 'Gói cơ bản';
     }
   }
+}
+
+enum QuaTrinhHoc {
+  lythuyet,
+  thuchanh,
+  pass,
+  failed,
+}
+
+enum LyThuyet {
+  online,
+  taptrung,
+  kiemtralythuyet,
+  kiemtramophong,
+  cabin,
+}
+
+enum ThucHanh {
+  hocvo,
+  chayDAT,
+  saHinh,
+  thiTotNghiep,
+  hocChip,
+}
+
+enum Status {
+  passed,
+  failed,
+  none,
 }

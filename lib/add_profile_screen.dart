@@ -95,7 +95,7 @@ class _AddProfileScreenState extends State<AddProfileScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Thông tin chi tiết"),
+        title: const Text("Thêm thông tin học viên"),
       ),
       body: ListView(
         children: [
@@ -357,6 +357,42 @@ class _AddProfileScreenState extends State<AddProfileScreen> {
             ),
             onExpansionChanged: (expanded) {},
             children: [
+              Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: TextField(
+                      decoration: InputDecoration(
+                        enabledBorder: enabledBorder,
+                        focusedBorder: focusedBorder,
+                        hintText: 'Buổi học',
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: TextField(
+                      decoration: InputDecoration(
+                        enabledBorder: enabledBorder,
+                        focusedBorder: focusedBorder,
+                        hintText: 'Số giờ',
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: TextField(
+                      decoration: InputDecoration(
+                        enabledBorder: enabledBorder,
+                        focusedBorder: focusedBorder,
+                        hintText: 'Số km',
+                      ),
+                    ),
+                  ),
+                  Icon(Icons.add),
+                ],
+              ),
+              SizedBox(height: 16),
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 child: TextField(
@@ -445,7 +481,18 @@ class _AddProfileScreenState extends State<AddProfileScreen> {
                   decoration: InputDecoration(
                     enabledBorder: enabledBorder,
                     focusedBorder: focusedBorder,
-                    hintText: 'Nhập ưu đãi 1',
+                    hintText: 'Nhập ưu đãi 1',// thêm nhiều dòng (text area)
+                  ),
+                ),
+              ),
+               Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: TextField(
+                  controller: controllers[13],
+                  decoration: InputDecoration(
+                    enabledBorder: enabledBorder,
+                    focusedBorder: focusedBorder,
+                    hintText: 'ghi chú',// thêm ưu đãi nhiều dòng (text area), thêm checkbox
                   ),
                 ),
               ),

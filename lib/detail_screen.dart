@@ -25,9 +25,9 @@ class _DetailScreenState extends State<DetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Thông tin chi tiết',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        title:  Text(
+          '${profile?.hovaten ?? ''} - ${profile?.lophoc ?? ''}',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         actions: [
           IconButton(
@@ -125,7 +125,8 @@ class _DetailScreenState extends State<DetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  info('Ngày học vỡ', profile?.ngayhocvo),
+                  info('Học vỡ', profile?.ngayhocvo),
+                  Text('ngày: assss - giờ: 3h'), //thêm nhiều dòng
                   info('Ngày học sa hình', profile?.ngayhocsahinh),
                   info('Ngày học bổ túc thêm', profile?.ngayhobotucthem),
                 ],
