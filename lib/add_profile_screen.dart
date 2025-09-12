@@ -3,9 +3,10 @@ import 'package:drop_down_list/model/selected_list_item.dart';
 import 'package:flutter/material.dart';
 import 'package:qlhv_app/helper/dialog_helper.dart';
 import 'package:qlhv_app/models/profile_model.dart';
-import 'package:qlhv_app/services/local_store.dart';
 
 import 'enums.dart';
+import 'row_add.dart';
+import 'status_widget.dart';
 
 class AddProfileScreen extends StatefulWidget {
   const AddProfileScreen({super.key});
@@ -16,44 +17,92 @@ class AddProfileScreen extends StatefulWidget {
 
 class _AddProfileScreenState extends State<AddProfileScreen> {
   final ProfileModel _profileModel = ProfileModel();
-
   List<TextEditingController> controllers =
       List.generate(14, (index) => TextEditingController());
   List<TextEditingController> controllers2 =
       List.generate(10, (index) => TextEditingController());
   ProfileModel? profile;
 
+  List<RowTime> hocVoData = [];
+  List<RowTime> chayDATData = [];
+  List<RowTime> saHinhData = [];
+  List<RowTime> hocChipData = [];
+  int hocOnline = 2;
+  int hocTapTrung = 2;
+  int kiemtralythuyet = 2;
+  int kiemtramophong = 2;
+  int hoCabin = 2;
+
   @override
   void initState() {
     super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final args = ModalRoute.of(context)!.settings.arguments;
+      if (args is ProfileModel) {
+        setState(() {
+          profile = args;
+          controllers[0].text = profile?.hovaten ?? "";
+          controllers[1].text = profile?.ngaysinh ?? "";
+          controllers[2].text = profile?.cccd ?? "";
+          controllers[3].text = profile?.sdt ?? "";
+          controllers[4].text = profile?.diachi ?? "";
+          controllers[5].text = profile?.lophoc ?? "";
+          controllers[6].text = profile?.ngaykhaigiang ?? "";
+          controllers[13].text =
+              ""; // ưu đãi 1 (nếu có field riêng thì map luôn)
+
+          controllers2[0].text = profile?.nguonHV ?? ''; // Nguồn học viên
+          controllers2[1].text = profile?.giaovienDAT ?? '';
+          controllers2[2].text = profile?.xeDAT ?? '';
+          controllers2[3].text = profile?.loaiHocPhi ?? '';
+
+          hocOnline = profile?.online ?? 2;
+          hocTapTrung = profile?.taptrung ?? 2;
+          kiemtralythuyet = profile?.kiemtralythuyet ?? 2;
+          kiemtramophong = profile?.kiemtramophong ?? 2;
+          hoCabin = profile?.cabin ?? 2;
+        });
+      }
+    });
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Lấy arguments từ route
-    final args = ModalRoute.of(context)!.settings.arguments;
-    if (args is ProfileModel) {
-      profile = args;
+  int getLyThuyetValue(LyThuyet value) {
+    switch (value) {
+      case LyThuyet.online:
+        return hocOnline;
+      case LyThuyet.taptrung:
+        return hocTapTrung;
+      case LyThuyet.kiemtralythuyet:
+        return kiemtralythuyet;
+      case LyThuyet.kiemtramophong:
+        return kiemtramophong;
+      case LyThuyet.cabin:
+        return hoCabin;
+      default:
+        return 2;
+    }
+  }
 
-      // Gán dữ liệu từ ProfileModel vào controllers
-      controllers[0].text = profile?.hovaten ?? "";
-      controllers[1].text = profile?.ngaysinh ?? "";
-      controllers[2].text = profile?.cccd ?? "";
-      controllers[3].text = profile?.sdt ?? "";
-      controllers[4].text = profile?.diachi ?? "";
-      controllers[5].text = profile?.lophoc ?? "";
-      controllers[6].text = profile?.ngaykhaigiang ?? "";
-      controllers[7].text = profile?.ngaytaptrung ?? "";
-      controllers[8].text = profile?.ngayhockiemtralythuyet ?? "";
-      controllers[9].text = profile?.ngayhoccabin ?? "";
-      controllers[10].text = profile?.ngayhocvo ?? "";
-      controllers[11].text = profile?.ngayhocsahinh ?? "";
-      controllers[12].text = profile?.ngayhobotucthem ?? "";
-      controllers[13].text = ""; // ưu đãi 1 (nếu có field riêng thì map luôn)
-
-      //downlist      controllers2[0].text = ""; // Nguồn học viên
-      // controllers2[0].text = profile?; // Nguồn học viên
+  void setLyThuyetValue(LyThuyet key, int value) {
+    switch (key) {
+      case LyThuyet.online:
+        hocOnline = value;
+        break;
+      case LyThuyet.taptrung:
+        hocTapTrung = value;
+        break;
+      case LyThuyet.kiemtralythuyet:
+        kiemtralythuyet = value;
+        break;
+      case LyThuyet.kiemtramophong:
+        kiemtramophong = value;
+        break;
+      case LyThuyet.cabin:
+        hoCabin = value;
+        break;
+      default:
+        break;
     }
   }
 
@@ -63,6 +112,12 @@ class _AddProfileScreenState extends State<AddProfileScreen> {
     controllers2.map((e) => e.dispose());
     super.dispose();
   }
+
+  void addData(
+    String key,
+    Map data,
+  ) =>
+      data[key] = data;
 
   void onTextFieldTap<T extends HasText>(
       List<T> options, TextEditingController controller) {
@@ -276,76 +331,16 @@ class _AddProfileScreenState extends State<AddProfileScreen> {
             ),
             onExpansionChanged: (expanded) {},
             children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: TextField(
-                  controller: controllers[7],
-                  readOnly: true,
-                  decoration: InputDecoration(
-                    enabledBorder: enabledBorder,
-                    focusedBorder: focusedBorder,
-                    hintText: 'Nhập ngày tập trung',
+              ...LyThuyet.values.map(
+                (e) => Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: StatusWidget(
+                    title: e.text,
+                    value: getLyThuyetValue(e),
+                    onChanged: (p0) {
+                      setLyThuyetValue(e, p0);
+                    },
                   ),
-                  onTap: () async {
-                    DateTime? picked = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime(2000),
-                      firstDate: DateTime(1900),
-                      lastDate: DateTime.now(),
-                    );
-                    if (picked != null) {
-                      controllers[7].text =
-                          "${picked.day}/${picked.month}/${picked.year}";
-                    }
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: TextField(
-                  controller: controllers[8],
-                  readOnly: true,
-                  decoration: InputDecoration(
-                    enabledBorder: enabledBorder,
-                    focusedBorder: focusedBorder,
-                    hintText: 'Nhập ngày học kiểm tra lý thuyết',
-                  ),
-                  onTap: () async {
-                    DateTime? picked = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime(2000),
-                      firstDate: DateTime(1900),
-                      lastDate: DateTime.now(),
-                    );
-                    if (picked != null) {
-                      controllers[8].text =
-                          "${picked.day}/${picked.month}/${picked.year}";
-                    }
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: TextField(
-                  controller: controllers[9],
-                  readOnly: true,
-                  decoration: InputDecoration(
-                    enabledBorder: enabledBorder,
-                    focusedBorder: focusedBorder,
-                    hintText: 'Nhập ngày học cabin',
-                  ),
-                  onTap: () async {
-                    DateTime? picked = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime(2000),
-                      firstDate: DateTime(1900),
-                      lastDate: DateTime.now(),
-                    );
-                    if (picked != null) {
-                      controllers[9].text =
-                          "${picked.day}/${picked.month}/${picked.year}";
-                    }
-                  },
                 ),
               ),
             ],
@@ -357,112 +352,54 @@ class _AddProfileScreenState extends State<AddProfileScreen> {
             ),
             onExpansionChanged: (expanded) {},
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: TextField(
-                      decoration: InputDecoration(
-                        enabledBorder: enabledBorder,
-                        focusedBorder: focusedBorder,
-                        hintText: 'Buổi học',
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: TextField(
-                      decoration: InputDecoration(
-                        enabledBorder: enabledBorder,
-                        focusedBorder: focusedBorder,
-                        hintText: 'Số giờ',
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: TextField(
-                      decoration: InputDecoration(
-                        enabledBorder: enabledBorder,
-                        focusedBorder: focusedBorder,
-                        hintText: 'Số km',
-                      ),
-                    ),
-                  ),
-                  Icon(Icons.add),
-                ],
-              ),
-              SizedBox(height: 16),
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: TextField(
-                  controller: controllers[10],
-                  readOnly: true,
-                  decoration: InputDecoration(
-                    enabledBorder: enabledBorder,
-                    focusedBorder: focusedBorder,
-                    hintText: 'Nhập ngày học vỡ',
-                  ),
-                  onTap: () async {
-                    DateTime? picked = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime(2000),
-                      firstDate: DateTime(1900),
-                      lastDate: DateTime.now(),
-                    );
-                    if (picked != null) {
-                      controllers[10].text =
-                          "${picked.day}/${picked.month}/${picked.year}";
-                    }
+                child: RowAdd(
+                  title: 'Học Vỡ',
+                  items: profile?.hocVo,
+                  onChanged: (p0) {
+                    hocVoData = p0;
+                  },
+                ),
+              ),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: RowAdd(
+                  title: 'Chạy DAT',
+                  items: profile?.chayDAT,
+                  onChanged: (p0) {
+                    chayDATData = p0;
+                  },
+                ),
+              ),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: RowAdd(
+                  title: 'Học Sa hình',
+                  items: profile?.saHinh,
+                  onChanged: (p0) {
+                    saHinhData = p0;
+                  },
+                ),
+              ),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: RowAdd(
+                  title: 'Học Chip',
+                  items: profile?.hocChip,
+                  onChanged: (p0) {
+                    hocChipData = p0;
                   },
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: TextField(
-                  controller: controllers[11],
-                  readOnly: true,
-                  decoration: InputDecoration(
-                    enabledBorder: enabledBorder,
-                    focusedBorder: focusedBorder,
-                    hintText: 'Nhập ngày học sa hình',
-                  ),
-                  onTap: () async {
-                    DateTime? picked = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime(2000),
-                      firstDate: DateTime(1900),
-                      lastDate: DateTime.now(),
-                    );
-                    if (picked != null) {
-                      controllers[11].text =
-                          "${picked.day}/${picked.month}/${picked.year}";
-                    }
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: TextField(
-                  controller: controllers[12],
-                  readOnly: true,
-                  decoration: InputDecoration(
-                    enabledBorder: enabledBorder,
-                    focusedBorder: focusedBorder,
-                    hintText: 'Nhập ngày học bổ túc thêm',
-                  ),
-                  onTap: () async {
-                    DateTime? picked = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime(2000),
-                      firstDate: DateTime(1900),
-                      lastDate: DateTime.now(),
-                    );
-                    if (picked != null) {
-                      controllers[12].text =
-                          "${picked.day}/${picked.month}/${picked.year}";
-                    }
-                  },
+                child: StatusWidget(
+                  title: 'Thi tốt nghiệp',
+                  onChanged: (p0) {},
                 ),
               ),
             ],
@@ -481,18 +418,19 @@ class _AddProfileScreenState extends State<AddProfileScreen> {
                   decoration: InputDecoration(
                     enabledBorder: enabledBorder,
                     focusedBorder: focusedBorder,
-                    hintText: 'Nhập ưu đãi 1',// thêm nhiều dòng (text area)
+                    hintText: 'Nhập ưu đãi 1', // thêm nhiều dòng (text area)
                   ),
                 ),
               ),
-               Padding(
+              Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 child: TextField(
                   controller: controllers[13],
                   decoration: InputDecoration(
                     enabledBorder: enabledBorder,
                     focusedBorder: focusedBorder,
-                    hintText: 'ghi chú',// thêm ưu đãi nhiều dòng (text area), thêm checkbox
+                    hintText:
+                        'ghi chú', // thêm ưu đãi nhiều dòng (text area), thêm checkbox
                   ),
                 ),
               ),
@@ -505,23 +443,31 @@ class _AddProfileScreenState extends State<AddProfileScreen> {
         child: ElevatedButton(
           onPressed: () async {
             DialogHelper.showLoading();
-            if (profile == null) {
-              await _profileModel.add(ProfileModel(
-                hovaten: controllers[0].text,
-                ngaysinh: controllers[1].text,
-                cccd: controllers[2].text,
-                sdt: controllers[3].text,
-                diachi: controllers[4].text,
-                lophoc: controllers[5].text,
-                ngaykhaigiang: controllers[6].text,
-                ngaytaptrung: controllers[7].text,
-                ngayhockiemtralythuyet: controllers[8].text,
-                ngayhoccabin: controllers[9].text,
-                ngayhocvo: controllers[10].text,
-                ngayhocsahinh: controllers[11].text,
-                ngayhobotucthem: controllers[12].text,
-              ));
-            } else {}
+            await _profileModel.add(
+              profile ??
+                  ProfileModel(
+                    hovaten: controllers[0].text,
+                    ngaysinh: controllers[1].text,
+                    cccd: controllers[2].text,
+                    sdt: controllers[3].text,
+                    diachi: controllers[4].text,
+                    lophoc: controllers[5].text,
+                    ngaykhaigiang: controllers[6].text,
+                    nguonHV: controllers2[0].text,
+                    giaovienDAT: controllers2[1].text,
+                    xeDAT: controllers2[2].text,
+                    loaiHocPhi: controllers2[3].text,
+                    online: hocOnline,
+                    taptrung: hocTapTrung,
+                    kiemtralythuyet: kiemtralythuyet,
+                    kiemtramophong: kiemtramophong,
+                    cabin: hoCabin,
+                    hocVo: hocVoData,
+                    chayDAT: chayDATData,
+                    saHinh: saHinhData,
+                    hocChip: hocChipData,
+                  ),
+            );
             await Future.delayed(const Duration(milliseconds: 300));
             DialogHelper.hideLoading();
             Navigator.pop(context);

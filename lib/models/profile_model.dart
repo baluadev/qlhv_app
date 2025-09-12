@@ -4,6 +4,42 @@ import 'package:qlhv_app/const.dart';
 import 'package:qlhv_app/helper/dialog_helper.dart';
 import 'package:qlhv_app/services/local_store.dart';
 
+class RowTime {
+  final String? date;
+  final int? hour;
+  final int? km;
+
+  RowTime({
+    this.date,
+    this.hour,
+    this.km,
+  });
+
+  /// Convert từ Map (json) sang RowTime
+  factory RowTime.fromJson(Map<String, dynamic> json) {
+    return RowTime(
+      date: json['date'] as String?,
+      hour:
+          json['hour'] is int ? json['hour'] : int.tryParse('${json['hour']}'),
+      km: json['km'] is int ? json['km'] : int.tryParse('${json['km']}'),
+    );
+  }
+
+  /// Convert RowTime sang Map (json)
+  Map<String, dynamic> toJson() {
+    return {
+      'date': date,
+      'hour': hour,
+      'km': km,
+    };
+  }
+
+  @override
+  String toString() {
+    return 'RowTime(date: $date, hour: $hour, km: $km)';
+  }
+}
+
 class ProfileModel {
   final String? hovaten;
   final String? ngaysinh;
@@ -12,17 +48,19 @@ class ProfileModel {
   final String? diachi;
   final String? lophoc;
   final String? ngaykhaigiang;
-  final int? nguonHV;
-  final int? giaovienDAT;
-  final int? xeDAT;
-  final int? loaiHocPhi;
-  final String? ngaytaptrung;
-  final String? ngayhockiemtralythuyet;
-  final String? ngayhoccabin;
-  final String? ngayhocvo;
-  final String? ngayhocsahinh;
-  final String? ngayhobotucthem;
-
+  final String? nguonHV;
+  final String? giaovienDAT;
+  final String? xeDAT;
+  final String? loaiHocPhi;
+  final int? online;
+  final int? taptrung;
+  final int? kiemtralythuyet;
+  final int? kiemtramophong;
+  final int? cabin;
+  final List<RowTime>? hocVo;
+  final List<RowTime>? chayDAT;
+  final List<RowTime>? saHinh;
+  final List<RowTime>? hocChip;
   ProfileModel({
     this.hovaten,
     this.ngaysinh,
@@ -35,12 +73,15 @@ class ProfileModel {
     this.giaovienDAT,
     this.xeDAT,
     this.loaiHocPhi,
-    this.ngaytaptrung,
-    this.ngayhockiemtralythuyet,
-    this.ngayhoccabin,
-    this.ngayhocvo,
-    this.ngayhocsahinh,
-    this.ngayhobotucthem,
+    this.online,
+    this.taptrung,
+    this.kiemtralythuyet,
+    this.kiemtramophong,
+    this.cabin,
+    this.hocVo,
+    this.chayDAT,
+    this.saHinh,
+    this.hocChip,
   });
 
   factory ProfileModel.fromJson(Map<String, dynamic> json) {
@@ -52,16 +93,27 @@ class ProfileModel {
       diachi: json['diachi'] as String?,
       lophoc: json['lophoc'] as String?,
       ngaykhaigiang: json['ngaykhaigiang'] as String?,
-      nguonHV: json['nguonHV'] as int?,
-      giaovienDAT: json['giaovienDAT'] as int?,
-      xeDAT: json['xeDAT'] as int?,
-      loaiHocPhi: json['loaiHocPhi'] as int?,
-      ngaytaptrung: json['ngaytaptrung'] as String?,
-      ngayhockiemtralythuyet: json['ngayhockiemtralythuyet'] as String?,
-      ngayhoccabin: json['ngayhoccabin'] as String?,
-      ngayhocvo: json['ngayhocvo'] as String?,
-      ngayhocsahinh: json['ngayhocsahinh'] as String?,
-      ngayhobotucthem: json['ngayhobotucthem'] as String?,
+      nguonHV: json['nguonHV'] as String?,
+      giaovienDAT: json['giaovienDAT'] as String?,
+      xeDAT: json['xeDAT'] as String?,
+      loaiHocPhi: json['loaiHocPhi'] as String?,
+      online: json['online'] as int?,
+      taptrung: json['taptrung'] as int?,
+      kiemtralythuyet: json['kiemtralythuyet'] as int?,
+      kiemtramophong: json['kiemtramophong'] as int?,
+      cabin: json['cabin'] as int?,
+      hocVo: (json['hocVo'] as List<dynamic>?)
+          ?.map((e) => RowTime.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      chayDAT: (json['chayDAT'] as List<dynamic>?)
+          ?.map((e) => RowTime.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      saHinh: (json['saHinh'] as List<dynamic>?)
+          ?.map((e) => RowTime.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      hocChip: (json['hocChip'] as List<dynamic>?)
+          ?.map((e) => RowTime.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
   }
 
@@ -78,19 +130,20 @@ class ProfileModel {
       'giaovienDAT': giaovienDAT,
       'xeDAT': xeDAT,
       'loaiHocPhi': loaiHocPhi,
-      'ngaytaptrung': ngaytaptrung,
-      'ngayhockiemtralythuyet': ngayhockiemtralythuyet,
-      'ngayhoccabin': ngayhoccabin,
-      'ngayhocvo': ngayhocvo,
-      'ngayhocsahinh': ngayhocsahinh,
-      'ngayhobotucthem': ngayhobotucthem,
+      'online': online,
+      'taptrung': taptrung,
+      'kiemtralythuyet': kiemtralythuyet,
+      'kiemtramophong': kiemtramophong,
+      'cabin': cabin,
+      'hocVo': hocVo?.map((e) => e.toJson()).toList(),
+      'chayDAT': chayDAT?.map((e) => e.toJson()).toList(),
+      'saHinh': saHinh?.map((e) => e.toJson()).toList(),
+      'hocChip': hocChip?.map((e) => e.toJson()).toList(),
     };
   }
 
   @override
-  String toString() {
-    return jsonEncode(toJson());
-  }
+  String toString() => jsonEncode(toJson());
 
   Future<bool> add(ProfileModel profile) async {
     var url = Uri.http(Const.baseUrl, 'qlhv-car/us-central1/api/profile/add');

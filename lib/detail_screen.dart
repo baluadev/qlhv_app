@@ -82,13 +82,13 @@ class _DetailScreenState extends State<DetailScreen> {
                 children: [
                   info('Lớp học', profile?.lophoc),
                   info('Ngày khai giảng', profile?.ngaykhaigiang),
-                  info('Nguồn học viên',
-                      NguonHV.values[profile?.nguonHV ?? 0].text),
-                  info('Giáo viên dạy DAT',
-                      GiaoVienDAT.values[profile?.giaovienDAT ?? 0].text),
-                  info('Xe DAT', XeDAT.values[profile?.xeDAT ?? 0].text),
-                  info('Gói học phí',
-                      LoaiHocPhi.values[profile?.loaiHocPhi ?? 0].text),
+                  // info('Nguồn học viên',
+                  //     NguonHV.values[profile?.nguonHV ?? 0].text),
+                  // info('Giáo viên dạy DAT',
+                  //     GiaoVienDAT.values[profile?.giaovienDAT ?? 0].text),
+                  // info('Xe DAT', XeDAT.values[profile?.xeDAT ?? 0].text),
+                  // info('Gói học phí',
+                  //     LoaiHocPhi.values[profile?.loaiHocPhi ?? 0].text),
                 ],
               ),
             ),
@@ -105,10 +105,10 @@ class _DetailScreenState extends State<DetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  info('Ngày tập trung', profile?.ngaytaptrung),
-                  info('Ngày học kiểm tra lý thuyết',
-                      profile?.ngayhockiemtralythuyet),
-                  info('Ngày học cabin', profile?.ngayhoccabin),
+                  // info('Ngày tập trung', profile?.ngaytaptrung),
+                  // info('Ngày học kiểm tra lý thuyết',
+                  //     profile?.ngayhockiemtralythuyet),
+                  // info('Ngày học cabin', profile?.ngayhoccabin),
                 ],
               ),
             ),
@@ -125,10 +125,10 @@ class _DetailScreenState extends State<DetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  info('Học vỡ', profile?.ngayhocvo),
-                  Text('ngày: assss - giờ: 3h'), //thêm nhiều dòng
-                  info('Ngày học sa hình', profile?.ngayhocsahinh),
-                  info('Ngày học bổ túc thêm', profile?.ngayhobotucthem),
+                  // info('Học vỡ', profile?.ngayhocvo),
+                  // Text('ngày: assss - giờ: 3h'), //thêm nhiều dòng
+                  // info('Ngày học sa hình', profile?.ngayhocsahinh),
+                  // info('Ngày học bổ túc thêm', profile?.ngayhobotucthem),
                 ],
               ),
             ),

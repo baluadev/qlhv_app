@@ -1,7 +1,5 @@
-import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:qlhv_app/helper/dialog_helper.dart';
 import 'package:qlhv_app/models/profile_model.dart';
 
@@ -25,6 +23,8 @@ class _HomeScreenState extends State<HomeScreen> {
       });
       return;
     }
+
+    list.clear();
 
     DialogHelper.showLoading();
     list = await _profileModel.search(query);

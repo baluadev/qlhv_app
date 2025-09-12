@@ -84,24 +84,74 @@ enum QuaTrinhHoc {
   failed,
 }
 
-enum LyThuyet {
+enum LyThuyet implements HasText {
   online,
   taptrung,
   kiemtralythuyet,
   kiemtramophong,
-  cabin,
+  cabin;
+
+  @override
+  String get text {
+    switch (this) {
+      case LyThuyet.online:
+        return 'Học Online';
+      case LyThuyet.taptrung:
+        return 'Học tập trung';
+      case LyThuyet.kiemtralythuyet:
+        return 'Kiểm tra lý thuyết';
+      case LyThuyet.kiemtramophong:
+        return 'Kiểm tra mô phỏng';
+      case LyThuyet.cabin:
+        return 'Học Cabin';
+      default:
+        return 'Không chọn';
+    }
+  }
 }
 
-enum ThucHanh {
+enum ThucHanh implements HasText {
   hocvo,
   chayDAT,
   saHinh,
   thiTotNghiep,
-  hocChip,
+  hocChip;
+
+  @override
+  String get text {
+    switch (this) {
+      case ThucHanh.hocvo:
+        return 'Học Vỡ';
+      case ThucHanh.chayDAT:
+        return 'Chạy DAT';
+      case ThucHanh.saHinh:
+        return 'Học Sa Hình';
+      case ThucHanh.hocChip:
+        return 'Học Chip';
+      case ThucHanh.thiTotNghiep:
+        return 'Thi Tốt nghiệp';
+      default:
+        return 'Không chọn';
+    }
+  }
 }
 
-enum Status {
+enum Status implements HasText {
   passed,
   failed,
-  none,
+  none;
+
+  @override
+  String get text {
+    switch (this) {
+      case Status.passed:
+        return 'Hoàn thành';
+      case Status.failed:
+        return 'Trượt';
+      case Status.none:
+        return 'Không chọn';
+      default:
+        return 'Không chọn';
+    }
+  }
 }
