@@ -41,6 +41,7 @@ class RowTime {
 }
 
 class ProfileModel {
+  final String? id;
   final String? hovaten;
   final String? ngaysinh;
   final String? cccd;
@@ -62,6 +63,7 @@ class ProfileModel {
   final List<RowTime>? saHinh;
   final List<RowTime>? hocChip;
   ProfileModel({
+    this.id,
     this.hovaten,
     this.ngaysinh,
     this.cccd,
@@ -86,6 +88,7 @@ class ProfileModel {
 
   factory ProfileModel.fromJson(Map<String, dynamic> json) {
     return ProfileModel(
+      id: json['id'] as String?,
       hovaten: json['hovaten'] as String?,
       ngaysinh: json['ngaysinh'] as String?,
       cccd: json['cccd'] as String?,
@@ -119,6 +122,7 @@ class ProfileModel {
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'hovaten': hovaten,
       'ngaysinh': ngaysinh,
       'cccd': cccd,
@@ -165,6 +169,27 @@ class ProfileModel {
     return true;
   }
 
+  Future<bool> update(String profileId, ProfileModel profile) async {
+    var url = Uri.http(
+        Const.baseUrl, 'qlhv-car/us-central1/api/profile/update/$profileId');
+
+    final resp = await http.put(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        'profile': profile.toJson(),
+      }),
+    );
+    final data = json.decode(resp.body);
+    if (resp.statusCode != 200) {
+      final message = data['message'];
+      DialogHelper.showToast(message);
+      return false;
+    }
+    await Future.delayed(const Duration(seconds: 1));
+    return true;
+  }
+
   Future<List<ProfileModel>> search(String keyword) async {
     final userId = LocalStore.inst.getUser()?.id ?? '';
     try {
@@ -173,9 +198,7 @@ class ProfileModel {
         'qlhv-car/us-central1/api/profile/search/$userId',
         {'keyword': keyword}, // query string
       );
-      print(userId);
       final resp = await http.get(url);
-      print(resp.body);
       final data = json.decode(resp.body);
       if (resp.statusCode != 200) {
         final message = data['message'] ?? "Có lỗi xảy ra";
@@ -188,6 +211,31 @@ class ProfileModel {
     } catch (e) {
       print(e);
       return [];
+    }
+  }
+
+  Future<ProfileModel?> getProfile(String profileId) async {
+    try {
+      print(profileId);
+      final url = Uri.http(
+        Const.baseUrl,
+        'qlhv-car/us-central1/api/profile/detail/$profileId',
+      );
+      final resp = await http.get(url);
+      print(resp.body);
+      final data = json.decode(resp.body);
+
+      if (resp.statusCode != 200) {
+        final message = data['message'] ?? "Có lỗi xảy ra";
+        DialogHelper.showToast(message);
+        return null;
+      }
+
+      final results = data['profile'];
+      return ProfileModel.fromJson(results);
+    } catch (e) {
+      print(e);
+      return null;
     }
   }
 }

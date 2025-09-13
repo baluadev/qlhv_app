@@ -13,21 +13,69 @@ class _DetailScreenState extends State<DetailScreen> {
   ProfileModel? profile;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final args = ModalRoute.of(context)!.settings.arguments;
-    if (args is ProfileModel) {
-      profile = args;
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final args = ModalRoute.of(context)!.settings.arguments;
+      if (args is ProfileModel) {
+        profile = args;
+        ProfileModel()
+            .getProfile(profile?.id ?? '')
+            .then((value) => setState(() {
+                  profile = value;
+                }));
+      }
+    });
+  }
+
+  Color getStatusColor(int status) {
+    switch (Status.values[status]) {
+      case Status.passed:
+        return Colors.green;
+      case Status.failed:
+        return Colors.red;
+      case Status.none:
+        return Colors.black;
+      default:
+        return Colors.black;
     }
+  }
+
+  int countCompleted(List<int?> list) {
+    return list.where((element) => element == Status.passed.index).length;
+  }
+
+  int getTotalHours() {
+    int hocVo = (profile?.hocVo ?? [])
+        .fold<int>(0, (sum, item) => sum + (item.hour ?? 0));
+    int chayDAT = (profile?.chayDAT ?? [])
+        .fold<int>(0, (sum, item) => sum + (item.hour ?? 0));
+    int saHinh = (profile?.saHinh ?? [])
+        .fold<int>(0, (sum, item) => sum + (item.hour ?? 0));
+    int hocChip = (profile?.hocChip ?? [])
+        .fold<int>(0, (sum, item) => sum + (item.hour ?? 0));
+    return hocVo + chayDAT + saHinh + hocChip;
+  }
+
+  int getTotalKm() {
+    int hocVo = (profile?.hocVo ?? [])
+        .fold<int>(0, (sum, item) => sum + (item.km ?? 0));
+    int chayDAT = (profile?.chayDAT ?? [])
+        .fold<int>(0, (sum, item) => sum + (item.km ?? 0));
+    int saHinh = (profile?.saHinh ?? [])
+        .fold<int>(0, (sum, item) => sum + (item.km ?? 0));
+    int hocChip = (profile?.hocChip ?? [])
+        .fold<int>(0, (sum, item) => sum + (item.km ?? 0));
+    return hocVo + chayDAT + saHinh + hocChip;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:  Text(
+        title: Text(
           '${profile?.hovaten ?? ''} - ${profile?.lophoc ?? ''}',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         actions: [
           IconButton(
@@ -46,108 +94,151 @@ class _DetailScreenState extends State<DetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              '1. Thông tin cá nhân',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
+            ExpansionTile(
+              title: const Text(
+                '1. Thông tin cá nhân',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
+              expandedAlignment: Alignment.centerLeft,
+              expandedCrossAxisAlignment: CrossAxisAlignment.start,
+              childrenPadding: const EdgeInsets.only(left: 20),
+              iconColor: Colors.green,
+              children: [
+                info('Họ và tên', profile?.hovaten),
+                info('Ngày sinh', profile?.ngaysinh),
+                info('CCCD', profile?.cccd),
+                info('SĐT', profile?.sdt),
+                info('Địa chỉ', profile?.diachi),
+              ],
             ),
-            const SizedBox(height: 4),
-            Padding(
-              padding: const EdgeInsets.only(left: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  info('Họ và tên', profile?.hovaten),
-                  info('Ngày sinh', profile?.ngaysinh),
-                  info('CCCD', profile?.cccd),
-                  info('SĐT', profile?.sdt),
-                  info('Địa chỉ', profile?.diachi),
-                ],
+            ExpansionTile(
+              title: const Text(
+                '2. Thông tin lớp học',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
+              expandedAlignment: Alignment.centerLeft,
+              expandedCrossAxisAlignment: CrossAxisAlignment.start,
+              childrenPadding: const EdgeInsets.only(left: 20),
+              iconColor: Colors.green,
+              children: [
+                info('Lớp học', profile?.lophoc),
+                info('Ngày khai giảng', profile?.ngaykhaigiang),
+                info('Nguồn học viên', profile?.nguonHV),
+                info('Giáo viên dạy DAT', profile?.giaovienDAT),
+                info('Xe DAT', profile?.xeDAT),
+                info('Gói học phí', profile?.loaiHocPhi),
+              ],
             ),
-            const Text(
-              '2. Thông tin lớp học',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
+            ExpansionTile(
+              title: Text(
+                '3. Lộ trình lý thuyết (${countCompleted([
+                      profile?.online,
+                      profile?.taptrung,
+                      profile?.kiemtralythuyet,
+                      profile?.kiemtramophong,
+                      profile?.cabin
+                    ])}/5)',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
+              expandedAlignment: Alignment.centerLeft,
+              expandedCrossAxisAlignment: CrossAxisAlignment.start,
+              childrenPadding: const EdgeInsets.only(left: 20),
+              iconColor: Colors.green,
+              children: [
+                info(
+                  'Học online: ',
+                  Status.values[profile?.online ?? 2].text,
+                  color: getStatusColor(
+                    profile?.online ?? 2,
+                  ),
+                ),
+                info(
+                  'Học tập trung',
+                  Status.values[profile?.taptrung ?? 2].text,
+                  color: getStatusColor(
+                    profile?.taptrung ?? 2,
+                  ),
+                ),
+                info(
+                  'Kiểm tra lý thuyết: ',
+                  Status.values[profile?.kiemtralythuyet ?? 2].text,
+                  color: getStatusColor(
+                    profile?.kiemtralythuyet ?? 2,
+                  ),
+                ),
+                info(
+                  'Kiểm tra mô phỏng',
+                  Status.values[profile?.kiemtramophong ?? 2].text,
+                  color: getStatusColor(
+                    profile?.kiemtramophong ?? 2,
+                  ),
+                ),
+                info(
+                  'Học cabin',
+                  Status.values[profile?.cabin ?? 0].text,
+                  color: getStatusColor(
+                    profile?.cabin ?? 2,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 4),
-            Padding(
-              padding: const EdgeInsets.only(left: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  info('Lớp học', profile?.lophoc),
-                  info('Ngày khai giảng', profile?.ngaykhaigiang),
-                  // info('Nguồn học viên',
-                  //     NguonHV.values[profile?.nguonHV ?? 0].text),
-                  // info('Giáo viên dạy DAT',
-                  //     GiaoVienDAT.values[profile?.giaovienDAT ?? 0].text),
-                  // info('Xe DAT', XeDAT.values[profile?.xeDAT ?? 0].text),
-                  // info('Gói học phí',
-                  //     LoaiHocPhi.values[profile?.loaiHocPhi ?? 0].text),
-                ],
+            ExpansionTile(
+              title: Text(
+                '4. Lộ trình học thực hành (${getTotalHours()} giờ - ${getTotalKm()} km)',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
+              expandedAlignment: Alignment.centerLeft,
+              expandedCrossAxisAlignment: CrossAxisAlignment.start,
+              childrenPadding: const EdgeInsets.only(left: 20),
+              iconColor: Colors.green,
+              children: [
+                HocVoTable(
+                  title: 'Học vỡ',
+                  hocVoData: profile?.hocVo ?? [],
+                ),
+                const SizedBox(height: 8),
+                HocVoTable(
+                  title: 'Chạy DAT',
+                  hocVoData: profile?.chayDAT ?? [],
+                ),
+                const SizedBox(height: 8),
+                HocVoTable(
+                  title: 'Học sa hình',
+                  hocVoData: profile?.saHinh ?? [],
+                ),
+                const SizedBox(height: 8),
+                HocVoTable(
+                  title: 'Học Chip',
+                  hocVoData: profile?.hocChip ?? [],
+                ),
+                const SizedBox(height: 8),
+              ],
             ),
-            const Text(
-              '3. Lộ trình lý thuyết',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
+            ExpansionTile(
+              title: const Text(
+                '5. Thông tin bổ sung',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-            const SizedBox(height: 4),
-            Padding(
-              padding: const EdgeInsets.only(left: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // info('Ngày tập trung', profile?.ngaytaptrung),
-                  // info('Ngày học kiểm tra lý thuyết',
-                  //     profile?.ngayhockiemtralythuyet),
-                  // info('Ngày học cabin', profile?.ngayhoccabin),
-                ],
-              ),
-            ),
-            const Text(
-              '4. Lộ trình học thực hành',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Padding(
-              padding: const EdgeInsets.only(left: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // info('Học vỡ', profile?.ngayhocvo),
-                  // Text('ngày: assss - giờ: 3h'), //thêm nhiều dòng
-                  // info('Ngày học sa hình', profile?.ngayhocsahinh),
-                  // info('Ngày học bổ túc thêm', profile?.ngayhobotucthem),
-                ],
-              ),
-            ),
-            const Text(
-              '5. Thông tin bổ sung',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Padding(
-              padding: const EdgeInsets.only(left: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  info('Ưu đãi 1', ''),
-                ],
-              ),
+              expandedAlignment: Alignment.centerLeft,
+              expandedCrossAxisAlignment: CrossAxisAlignment.start,
+              childrenPadding: const EdgeInsets.only(left: 20),
+              iconColor: Colors.green,
+              children: [],
             ),
           ],
         ),
@@ -155,7 +246,7 @@ class _DetailScreenState extends State<DetailScreen> {
     );
   }
 
-  Widget info(title, String? value) {
+  Widget info(title, String? value, {Color color = Colors.black}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: RichText(
@@ -163,20 +254,82 @@ class _DetailScreenState extends State<DetailScreen> {
           text: '$title: ',
           style: const TextStyle(
             fontSize: 14,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w400,
             color: Colors.black,
           ),
           children: [
             TextSpan(
               text: value ?? '---',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
-                fontWeight: FontWeight.w400,
-                color: Colors.black,
+                fontWeight: FontWeight.w600,
+                color: color,
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class HocVoTable extends StatelessWidget {
+  final String title;
+  final List<RowTime> hocVoData;
+
+  const HocVoTable({super.key, required this.hocVoData, required this.title});
+
+  int totalHours() {
+    return hocVoData.fold<int>(0, (sum, item) => sum + (item.hour ?? 0));
+  }
+
+  int totalKm() {
+    return hocVoData.fold<int>(0, (sum, item) => sum + (item.km ?? 0));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal, // nếu bảng rộng
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 8),
+          DataTable(
+              dataRowMaxHeight: 30,
+              dataRowMinHeight: 30,
+              headingRowHeight: 30,
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+              ),
+              border: TableBorder(
+                horizontalInside: BorderSide(color: Colors.grey.shade300),
+                verticalInside: BorderSide(color: Colors.grey.shade300),
+              ),
+              columns: const [
+                DataColumn(label: Text("Ngày học")),
+                DataColumn(label: Text("Số giờ")),
+                DataColumn(label: Text("Số km")),
+              ],
+              rows: [
+                ...hocVoData.map(
+                  (row) => DataRow(cells: [
+                    DataCell(Center(child: Text('${row.date}'))),
+                    DataCell(Center(child: Text('${row.hour}'))),
+                    DataCell(Center(child: Text('${row.km}'))),
+                  ]),
+                ),
+                DataRow(cells: [
+                  const DataCell(Center(child: Text('Tổng'))),
+                  DataCell(Center(child: Text('${totalHours()} giờ'))),
+                  DataCell(Center(child: Text('${totalKm()} km'))),
+                ]),
+              ]),
+        ],
       ),
     );
   }

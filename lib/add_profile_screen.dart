@@ -443,31 +443,34 @@ class _AddProfileScreenState extends State<AddProfileScreen> {
         child: ElevatedButton(
           onPressed: () async {
             DialogHelper.showLoading();
-            await _profileModel.add(
-              profile ??
-                  ProfileModel(
-                    hovaten: controllers[0].text,
-                    ngaysinh: controllers[1].text,
-                    cccd: controllers[2].text,
-                    sdt: controllers[3].text,
-                    diachi: controllers[4].text,
-                    lophoc: controllers[5].text,
-                    ngaykhaigiang: controllers[6].text,
-                    nguonHV: controllers2[0].text,
-                    giaovienDAT: controllers2[1].text,
-                    xeDAT: controllers2[2].text,
-                    loaiHocPhi: controllers2[3].text,
-                    online: hocOnline,
-                    taptrung: hocTapTrung,
-                    kiemtralythuyet: kiemtralythuyet,
-                    kiemtramophong: kiemtramophong,
-                    cabin: hoCabin,
-                    hocVo: hocVoData,
-                    chayDAT: chayDATData,
-                    saHinh: saHinhData,
-                    hocChip: hocChipData,
-                  ),
+            final newProfile = ProfileModel(
+              hovaten: controllers[0].text,
+              ngaysinh: controllers[1].text,
+              cccd: controllers[2].text,
+              sdt: controllers[3].text,
+              diachi: controllers[4].text,
+              lophoc: controllers[5].text,
+              ngaykhaigiang: controllers[6].text,
+              nguonHV: controllers2[0].text,
+              giaovienDAT: controllers2[1].text,
+              xeDAT: controllers2[2].text,
+              loaiHocPhi: controllers2[3].text,
+              online: hocOnline,
+              taptrung: hocTapTrung,
+              kiemtralythuyet: kiemtralythuyet,
+              kiemtramophong: kiemtramophong,
+              cabin: hoCabin,
+              hocVo: hocVoData,
+              chayDAT: chayDATData,
+              saHinh: saHinhData,
+              hocChip: hocChipData,
             );
+            if (profile == null) {
+              await _profileModel.add(newProfile);
+            } else {
+              await _profileModel.update(profile!.id!, newProfile);
+            }
+
             await Future.delayed(const Duration(milliseconds: 300));
             DialogHelper.hideLoading();
             Navigator.pop(context);
