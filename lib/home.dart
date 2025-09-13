@@ -1,7 +1,7 @@
-
 import 'package:flutter/material.dart';
 import 'package:qlhv_app/helper/dialog_helper.dart';
 import 'package:qlhv_app/models/profile_model.dart';
+import 'package:qlhv_app/utils.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -100,25 +100,50 @@ class _HomeScreenState extends State<HomeScreen> {
                   //phân biệt màu nguồn học viên
 
                   return GestureDetector(
-                    onTap: () {
-                      Navigator.pushNamed(context, '/detail', arguments: item);
+                    onTap: () async {
+                      await Navigator.pushNamed(context, '/detail',
+                          arguments: item);
+                      onSearchChanged();
                     },
                     child: Container(
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.grey),
                         borderRadius: BorderRadius.circular(8),
                       ),
+                      padding: const EdgeInsets.all(8),
+                      margin: const EdgeInsets.only(bottom: 8),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Họ và tên: ${item.hovaten}'),
-                          Text('SDT: ${item.sdt}'),
-                          Text('Khóa: ${item.lophoc}'),
-                          Text('Lý thuyết: passed(3/5)'),
-                          // Text('1. online (passed), '),
-                          // Text('2. tập trung (passed), '),
-                          // Text('3. kiem tra lý thuyết (failed), '),
-                          Text('Thực hành: (50h - 30km)'), // hiện thị tổng số giờ vs km của tất cả enum ThucHanh
+                          info('Họ và tên', item.hovaten),
+                          info('SDT', item.sdt),
+                          info('Khóa', item.lophoc),
+                          info(
+                            'Lý thuyết',
+                            '(${Utils.countCompleted([
+                                  item.online,
+                                  item.taptrung,
+                                  item.kiemtralythuyet,
+                                  item.kiemtramophong,
+                                  item.cabin
+                                ])}/5)',
+                            color: Colors.green,
+                          ),
+                          info(
+                            'Thực hành',
+                            '(${Utils.getTotalHours(
+                              hocVo: item.hocVo,
+                              chayDAT: item.chayDAT,
+                              saHinh: item.saHinh,
+                              hocChip: item.hocChip,
+                            )} giờ - ${Utils.getTotalKm(
+                              hocVo: item.hocVo,
+                              chayDAT: item.chayDAT,
+                              saHinh: item.saHinh,
+                              hocChip: item.hocChip,
+                            )} km)',
+                            color: Colors.green,
+                          ), // hiện thị tổng số giờ vs km của tất cả enum ThucHanh
                           // Text('1. Học Vỡ (3h), '), //thêm nhiều dòng
                           // Text(
                           //     '2. Chạy DAT (số km + số giờ), '), //thêm nhiều dòng (ngày+ giờ + km)
@@ -131,18 +156,35 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   );
-                  return ListTile(
-                    shape: const OutlineInputBorder(),
-                    onTap: () {
-                      Navigator.pushNamed(context, '/detail', arguments: item);
-                    },
-                    title: Text('Họ và tên: ${item.hovaten}'),
-                    subtitle: Text('SDT: ${item.sdt}'),
-                    trailing: const Icon(Icons.arrow_forward),
-                  );
                 },
               ),
             )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget info(title, String? value, {Color color = Colors.black}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: RichText(
+        text: TextSpan(
+          text: '$title: ',
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w400,
+            color: Colors.black,
+          ),
+          children: [
+            TextSpan(
+              text: value ?? '---',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
+            ),
           ],
         ),
       ),

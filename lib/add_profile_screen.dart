@@ -141,8 +141,8 @@ class _AddProfileScreenState extends State<AddProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final enabledBorder = OutlineInputBorder();
-    final focusedBorder = OutlineInputBorder();
+    const enabledBorder = OutlineInputBorder();
+    const focusedBorder = OutlineInputBorder();
     const styleTitle = TextStyle(
       fontSize: 16,
       fontWeight: FontWeight.bold,
@@ -150,7 +150,7 @@ class _AddProfileScreenState extends State<AddProfileScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Thêm thông tin học viên"),
+        title: Text("${profile == null ? 'Thêm' : 'Sửa'} thông tin học viên"),
       ),
       body: ListView(
         children: [
@@ -165,7 +165,7 @@ class _AddProfileScreenState extends State<AddProfileScreen> {
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 child: TextField(
                   controller: controllers[0],
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     enabledBorder: enabledBorder,
                     focusedBorder: focusedBorder,
                     hintText: 'Nhập họ và tên',
@@ -177,7 +177,7 @@ class _AddProfileScreenState extends State<AddProfileScreen> {
                 child: TextField(
                   controller: controllers[1],
                   readOnly: true,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     enabledBorder: enabledBorder,
                     focusedBorder: focusedBorder,
                     hintText: 'Nhập ngày sinh',
@@ -203,7 +203,7 @@ class _AddProfileScreenState extends State<AddProfileScreen> {
                   controller: controllers[2],
                   keyboardType: TextInputType.number,
                   maxLength: 12,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     enabledBorder: enabledBorder,
                     focusedBorder: focusedBorder,
                     counterText: '',
@@ -216,7 +216,7 @@ class _AddProfileScreenState extends State<AddProfileScreen> {
                 child: TextField(
                   controller: controllers[3],
                   keyboardType: TextInputType.phone,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     enabledBorder: enabledBorder,
                     focusedBorder: focusedBorder,
                     hintText: 'Nhập SDT',
@@ -227,7 +227,7 @@ class _AddProfileScreenState extends State<AddProfileScreen> {
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 child: TextField(
                   controller: controllers[4],
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     enabledBorder: enabledBorder,
                     focusedBorder: focusedBorder,
                     hintText: 'Nhập địa chỉ',
@@ -247,7 +247,7 @@ class _AddProfileScreenState extends State<AddProfileScreen> {
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 child: TextField(
                   controller: controllers[5],
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     enabledBorder: enabledBorder,
                     focusedBorder: focusedBorder,
                     hintText: 'Nhập lớp học',
@@ -259,7 +259,7 @@ class _AddProfileScreenState extends State<AddProfileScreen> {
                 child: TextField(
                   controller: controllers[6],
                   readOnly: true,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     enabledBorder: enabledBorder,
                     focusedBorder: focusedBorder,
                     hintText: 'Nhập ngày khai giảng',
@@ -414,8 +414,8 @@ class _AddProfileScreenState extends State<AddProfileScreen> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 child: TextField(
-                  controller: controllers[13],
-                  decoration: InputDecoration(
+                  controller: controllers[7],
+                  decoration: const InputDecoration(
                     enabledBorder: enabledBorder,
                     focusedBorder: focusedBorder,
                     hintText: 'Nhập ưu đãi 1', // thêm nhiều dòng (text area)
@@ -425,8 +425,8 @@ class _AddProfileScreenState extends State<AddProfileScreen> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 child: TextField(
-                  controller: controllers[13],
-                  decoration: InputDecoration(
+                  controller: controllers[8],
+                  decoration: const InputDecoration(
                     enabledBorder: enabledBorder,
                     focusedBorder: focusedBorder,
                     hintText:
@@ -444,6 +444,7 @@ class _AddProfileScreenState extends State<AddProfileScreen> {
           onPressed: () async {
             DialogHelper.showLoading();
             final newProfile = ProfileModel(
+              profileId: profile?.profileId,
               hovaten: controllers[0].text,
               ngaysinh: controllers[1].text,
               cccd: controllers[2].text,
@@ -464,11 +465,13 @@ class _AddProfileScreenState extends State<AddProfileScreen> {
               chayDAT: chayDATData,
               saHinh: saHinhData,
               hocChip: hocChipData,
+              uudai: controllers[7].text,
+              note: controllers[8].text,
             );
             if (profile == null) {
               await _profileModel.add(newProfile);
             } else {
-              await _profileModel.update(profile!.id!, newProfile);
+              await _profileModel.update(profile!.profileId!, newProfile);
             }
 
             await Future.delayed(const Duration(milliseconds: 300));

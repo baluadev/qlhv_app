@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:qlhv_app/enums.dart';
 import 'package:qlhv_app/models/profile_model.dart';
+import 'package:qlhv_app/utils.dart';
 
 class DetailScreen extends StatefulWidget {
   const DetailScreen({super.key});
@@ -19,13 +20,16 @@ class _DetailScreenState extends State<DetailScreen> {
       final args = ModalRoute.of(context)!.settings.arguments;
       if (args is ProfileModel) {
         profile = args;
-        ProfileModel()
-            .getProfile(profile?.id ?? '')
-            .then((value) => setState(() {
-                  profile = value;
-                }));
+        print('pro: ${profile?.profileId}');
+        loadData(profile?.profileId ?? '');
       }
     });
+  }
+
+  void loadData(String id) {
+    ProfileModel().getProfile(id).then((value) => setState(() {
+          profile = value;
+        }));
   }
 
   Color getStatusColor(int status) {
@@ -41,34 +45,6 @@ class _DetailScreenState extends State<DetailScreen> {
     }
   }
 
-  int countCompleted(List<int?> list) {
-    return list.where((element) => element == Status.passed.index).length;
-  }
-
-  int getTotalHours() {
-    int hocVo = (profile?.hocVo ?? [])
-        .fold<int>(0, (sum, item) => sum + (item.hour ?? 0));
-    int chayDAT = (profile?.chayDAT ?? [])
-        .fold<int>(0, (sum, item) => sum + (item.hour ?? 0));
-    int saHinh = (profile?.saHinh ?? [])
-        .fold<int>(0, (sum, item) => sum + (item.hour ?? 0));
-    int hocChip = (profile?.hocChip ?? [])
-        .fold<int>(0, (sum, item) => sum + (item.hour ?? 0));
-    return hocVo + chayDAT + saHinh + hocChip;
-  }
-
-  int getTotalKm() {
-    int hocVo = (profile?.hocVo ?? [])
-        .fold<int>(0, (sum, item) => sum + (item.km ?? 0));
-    int chayDAT = (profile?.chayDAT ?? [])
-        .fold<int>(0, (sum, item) => sum + (item.km ?? 0));
-    int saHinh = (profile?.saHinh ?? [])
-        .fold<int>(0, (sum, item) => sum + (item.km ?? 0));
-    int hocChip = (profile?.hocChip ?? [])
-        .fold<int>(0, (sum, item) => sum + (item.km ?? 0));
-    return hocVo + chayDAT + saHinh + hocChip;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -79,8 +55,9 @@ class _DetailScreenState extends State<DetailScreen> {
         ),
         actions: [
           IconButton(
-            onPressed: () {
-              Navigator.pushNamed(context, '/add', arguments: profile);
+            onPressed: () async {
+              await Navigator.pushNamed(context, '/add', arguments: profile);
+              loadData(profile?.profileId ?? '');
             },
             icon: const Icon(
               Icons.edit,
@@ -137,7 +114,7 @@ class _DetailScreenState extends State<DetailScreen> {
             ),
             ExpansionTile(
               title: Text(
-                '3. Lộ trình lý thuyết (${countCompleted([
+                '3. Lộ trình lý thuyết (${Utils.countCompleted([
                       profile?.online,
                       profile?.taptrung,
                       profile?.kiemtralythuyet,
@@ -155,7 +132,7 @@ class _DetailScreenState extends State<DetailScreen> {
               iconColor: Colors.green,
               children: [
                 info(
-                  'Học online: ',
+                  'Học online',
                   Status.values[profile?.online ?? 2].text,
                   color: getStatusColor(
                     profile?.online ?? 2,
@@ -169,7 +146,7 @@ class _DetailScreenState extends State<DetailScreen> {
                   ),
                 ),
                 info(
-                  'Kiểm tra lý thuyết: ',
+                  'Kiểm tra lý thuyết',
                   Status.values[profile?.kiemtralythuyet ?? 2].text,
                   color: getStatusColor(
                     profile?.kiemtralythuyet ?? 2,
@@ -193,7 +170,17 @@ class _DetailScreenState extends State<DetailScreen> {
             ),
             ExpansionTile(
               title: Text(
-                '4. Lộ trình học thực hành (${getTotalHours()} giờ - ${getTotalKm()} km)',
+                '4. Lộ trình học thực hành (${Utils.getTotalHours(
+                  hocVo: profile?.hocVo,
+                  chayDAT: profile?.chayDAT,
+                  saHinh: profile?.saHinh,
+                  hocChip: profile?.hocChip,
+                )} giờ - ${Utils.getTotalKm(
+                  hocVo: profile?.hocVo,
+                  chayDAT: profile?.chayDAT,
+                  saHinh: profile?.saHinh,
+                  hocChip: profile?.hocChip,
+                )} km)',
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -238,7 +225,10 @@ class _DetailScreenState extends State<DetailScreen> {
               expandedCrossAxisAlignment: CrossAxisAlignment.start,
               childrenPadding: const EdgeInsets.only(left: 20),
               iconColor: Colors.green,
-              children: [],
+              children: [
+                info('Ưu đãi', profile?.uudai),
+                info('Ghi chú', profile?.note),
+              ],
             ),
           ],
         ),

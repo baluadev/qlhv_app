@@ -35,9 +35,39 @@ class MyApp extends StatelessWidget {
         Locale('vi', ''), // Tiếng Việt
       ],
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+          useMaterial3: true,
+          scaffoldBackgroundColor: Colors.white,
+          appBarTheme: const AppBarTheme(
+            backgroundColor: Colors.transparent,
+            elevation: 1,
+          ),
+          datePickerTheme: DatePickerThemeData(
+            backgroundColor: Colors.white,
+            surfaceTintColor: Colors.transparent,
+            dayForegroundColor: MaterialStateProperty.resolveWith<Color?>(
+              (states) {
+                if (states.contains(MaterialState.selected)) {
+                  return Colors.white; // màu chữ khi chọn
+                }
+                return null; // mặc định
+              },
+            ),
+            dayBackgroundColor: MaterialStateProperty.resolveWith<Color?>(
+              (states) {
+                if (states.contains(MaterialState.selected)) {
+                  return Colors.green; // nền khi chọn
+                }
+                return null;
+              },
+            ),
+            cancelButtonStyle: ButtonStyle(
+              foregroundColor: MaterialStateProperty.all(Colors.red),
+            ),
+            confirmButtonStyle: ButtonStyle(
+              foregroundColor: MaterialStateProperty.all(Colors.green),
+            ),
+          )),
       initialRoute: LocalStore.inst.getUser() != null ? '/home' : '/login',
       routes: <String, WidgetBuilder>{
         '/login': (_) => LoginScreen(userModel: userModel),

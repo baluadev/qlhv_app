@@ -41,7 +41,7 @@ class RowTime {
 }
 
 class ProfileModel {
-  final String? id;
+  final String? profileId;
   final String? hovaten;
   final String? ngaysinh;
   final String? cccd;
@@ -62,8 +62,10 @@ class ProfileModel {
   final List<RowTime>? chayDAT;
   final List<RowTime>? saHinh;
   final List<RowTime>? hocChip;
+  final String? uudai;
+  final String? note;
   ProfileModel({
-    this.id,
+    this.profileId,
     this.hovaten,
     this.ngaysinh,
     this.cccd,
@@ -84,11 +86,13 @@ class ProfileModel {
     this.chayDAT,
     this.saHinh,
     this.hocChip,
+    this.uudai,
+    this.note,
   });
 
   factory ProfileModel.fromJson(Map<String, dynamic> json) {
     return ProfileModel(
-      id: json['id'] as String?,
+      profileId: json['profileId'] as String?,
       hovaten: json['hovaten'] as String?,
       ngaysinh: json['ngaysinh'] as String?,
       cccd: json['cccd'] as String?,
@@ -117,12 +121,14 @@ class ProfileModel {
       hocChip: (json['hocChip'] as List<dynamic>?)
           ?.map((e) => RowTime.fromJson(e as Map<String, dynamic>))
           .toList(),
+      uudai: json['uudai'] as String?,
+      note: json['note'] as String?,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
+      'profileId': profileId,
       'hovaten': hovaten,
       'ngaysinh': ngaysinh,
       'cccd': cccd,
@@ -143,6 +149,8 @@ class ProfileModel {
       'chayDAT': chayDAT?.map((e) => e.toJson()).toList(),
       'saHinh': saHinh?.map((e) => e.toJson()).toList(),
       'hocChip': hocChip?.map((e) => e.toJson()).toList(),
+      'uudai': uudai,
+      'note': note,
     };
   }
 
@@ -200,6 +208,7 @@ class ProfileModel {
       );
       final resp = await http.get(url);
       final data = json.decode(resp.body);
+      print(data);
       if (resp.statusCode != 200) {
         final message = data['message'] ?? "Có lỗi xảy ra";
         DialogHelper.showToast(message);
