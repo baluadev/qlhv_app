@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:qlhv_app/enums.dart';
+import 'package:qlhv_app/helper/dialog_helper.dart';
 import 'package:qlhv_app/models/profile_model.dart';
 import 'package:qlhv_app/utils.dart';
 
@@ -20,14 +21,15 @@ class _DetailScreenState extends State<DetailScreen> {
       final args = ModalRoute.of(context)!.settings.arguments;
       if (args is ProfileModel) {
         profile = args;
-        print('pro: ${profile?.profileId}');
         loadData(profile?.profileId ?? '');
       }
     });
   }
 
   void loadData(String id) {
+    DialogHelper.showLoading();
     ProfileModel().getProfile(id).then((value) => setState(() {
+          DialogHelper.hideLoading();
           profile = value;
         }));
   }
@@ -107,9 +109,15 @@ class _DetailScreenState extends State<DetailScreen> {
                 info('Lớp học', profile?.lophoc),
                 info('Ngày khai giảng', profile?.ngaykhaigiang),
                 info('Nguồn học viên', profile?.nguonHV),
+                info('Thẻ giáo viên', profile?.theGiaoVien),
                 info('Giáo viên dạy DAT', profile?.giaovienDAT),
                 info('Xe DAT', profile?.xeDAT),
                 info('Gói học phí', profile?.loaiHocPhi),
+                if (profile?.traGop != null && profile!.traGop!.isNotEmpty)
+                  TraGopTable(
+                    title: 'Trả góp',
+                    data: profile?.traGop ?? [],
+                  ),
               ],
             ),
             ExpansionTile(
@@ -198,6 +206,7 @@ class _DetailScreenState extends State<DetailScreen> {
                 const SizedBox(height: 8),
                 HocVoTable(
                   title: 'Chạy DAT',
+                  enableKm: true,
                   hocVoData: profile?.chayDAT ?? [],
                 ),
                 const SizedBox(height: 8),
@@ -211,6 +220,13 @@ class _DetailScreenState extends State<DetailScreen> {
                   hocVoData: profile?.hocChip ?? [],
                 ),
                 const SizedBox(height: 8),
+                info(
+                  'Thi tốt nghiệp',
+                  '${profile?.ngayTotNghiep} (${Status.values[profile?.thiTotNghiep ?? 2].text})',
+                  color: getStatusColor(
+                    profile?.thiTotNghiep ?? 2,
+                  ),
+                ),
               ],
             ),
             ExpansionTile(
@@ -226,7 +242,11 @@ class _DetailScreenState extends State<DetailScreen> {
               childrenPadding: const EdgeInsets.only(left: 20),
               iconColor: Colors.green,
               children: [
-                info('Ưu đãi', profile?.uudai),
+                if (profile?.uudai != null && profile!.uudai!.isNotEmpty)
+                  UuDaiTable(
+                    title: 'Ưu đãi',
+                    data: profile?.uudai ?? [],
+                  ),
                 info('Ghi chú', profile?.note),
               ],
             ),
@@ -265,9 +285,15 @@ class _DetailScreenState extends State<DetailScreen> {
 
 class HocVoTable extends StatelessWidget {
   final String title;
+  final bool? enableKm;
   final List<RowTime> hocVoData;
 
-  const HocVoTable({super.key, required this.hocVoData, required this.title});
+  const HocVoTable({
+    super.key,
+    required this.hocVoData,
+    required this.title,
+    this.enableKm = false,
+  });
 
   int totalHours() {
     return hocVoData.fold<int>(0, (sum, item) => sum + (item.hour ?? 0));
@@ -300,24 +326,120 @@ class HocVoTable extends StatelessWidget {
                 horizontalInside: BorderSide(color: Colors.grey.shade300),
                 verticalInside: BorderSide(color: Colors.grey.shade300),
               ),
-              columns: const [
-                DataColumn(label: Text("Ngày học")),
-                DataColumn(label: Text("Số giờ")),
-                DataColumn(label: Text("Số km")),
+              columns: [
+                const DataColumn(label: Text("Ngày học")),
+                const DataColumn(label: Text("Số giờ")),
+                if (enableKm ?? true) const DataColumn(label: Text("Số km")),
               ],
               rows: [
                 ...hocVoData.map(
                   (row) => DataRow(cells: [
                     DataCell(Center(child: Text('${row.date}'))),
                     DataCell(Center(child: Text('${row.hour}'))),
-                    DataCell(Center(child: Text('${row.km}'))),
+                    if (enableKm ?? true)
+                      DataCell(Center(child: Text('${row.km}'))),
                   ]),
                 ),
                 DataRow(cells: [
                   const DataCell(Center(child: Text('Tổng'))),
                   DataCell(Center(child: Text('${totalHours()} giờ'))),
-                  DataCell(Center(child: Text('${totalKm()} km'))),
+                  if (enableKm ?? true)
+                    DataCell(Center(child: Text('${totalKm()} km'))),
                 ]),
+              ]),
+        ],
+      ),
+    );
+  }
+}
+
+class UuDaiTable extends StatelessWidget {
+  final String title;
+  final List<UuDaiTime> data;
+
+  const UuDaiTable({super.key, required this.data, required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal, // nếu bảng rộng
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 8),
+          DataTable(
+              dataRowMaxHeight: 30,
+              dataRowMinHeight: 30,
+              headingRowHeight: 30,
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+              ),
+              border: TableBorder(
+                horizontalInside: BorderSide(color: Colors.grey.shade300),
+                verticalInside: BorderSide(color: Colors.grey.shade300),
+              ),
+              columns: const [
+                DataColumn(label: Text("Ngày")),
+                DataColumn(label: Text("Nội dung")),
+              ],
+              rows: [
+                ...data.map(
+                  (row) => DataRow(cells: [
+                    DataCell(Center(child: Text('${row.date}'))),
+                    DataCell(Center(child: Text('${row.content}'))),
+                  ]),
+                ),
+              ]),
+        ],
+      ),
+    );
+  }
+}
+
+class TraGopTable extends StatelessWidget {
+  final String title;
+  final List<TraGopTime> data;
+
+  const TraGopTable({super.key, required this.data, required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal, // nếu bảng rộng
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 8),
+          DataTable(
+              dataRowMaxHeight: 30,
+              dataRowMinHeight: 30,
+              headingRowHeight: 30,
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+              ),
+              border: TableBorder(
+                horizontalInside: BorderSide(color: Colors.grey.shade300),
+                verticalInside: BorderSide(color: Colors.grey.shade300),
+              ),
+              columns: const [
+                DataColumn(label: Text("Ngày")),
+                DataColumn(label: Text("Số tiền")),
+              ],
+              rows: [
+                ...data.map(
+                  (row) => DataRow(cells: [
+                    DataCell(Center(child: Text('${row.date}'))),
+                    DataCell(Center(child: Text('${row.money}'))),
+                  ]),
+                ),
               ]),
         ],
       ),

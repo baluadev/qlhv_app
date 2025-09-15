@@ -22,38 +22,9 @@ enum NguonHV implements HasText {
   }
 }
 
-enum GiaoVienDAT implements HasText {
-  giaovienA,
-  giaovienB;
-
-  @override
-  String get text {
-    switch (this) {
-      case GiaoVienDAT.giaovienA:
-        return 'Giáo viên A';
-      case GiaoVienDAT.giaovienB:
-        return 'Giáo viên B';
-      default:
-        return 'Giáo viên A';
-    }
-  }
-}
-
-enum XeDAT implements HasText {
-  xeA,
-  xeB;
-
-  @override
-  String get text {
-    switch (this) {
-      case XeDAT.xeA:
-        return 'Xe A';
-      case XeDAT.xeB:
-        return 'Xe B';
-      default:
-        return 'Xe A';
-    }
-  }
+enum TypeNguon {
+  teacher,
+  car,
 }
 
 //chỉ hiện thị khi nguồn học viên là giao viên

@@ -1,26 +1,23 @@
 import 'package:flutter/material.dart';
 import 'models/profile_model.dart';
-import 'extentions.dart';
 
-class RowAdd extends StatefulWidget {
+class UuDaiAdd extends StatefulWidget {
   final String title;
-  final List<RowTime>? items;
-  final bool? enabledKm;
-  final Function(List<RowTime>) onChanged;
+  final List<UuDaiTime>? items;
+  final Function(List<UuDaiTime>) onChanged;
 
-  const RowAdd({
+  const UuDaiAdd({
     super.key,
     required this.onChanged,
     required this.title,
-    this.enabledKm = false,
     this.items,
   });
 
   @override
-  State<RowAdd> createState() => _RowAddState();
+  State<UuDaiAdd> createState() => _UuDaiAddState();
 }
 
-class _RowAddState extends State<RowAdd> {
+class _UuDaiAddState extends State<UuDaiAdd> {
   final List<Map<String, TextEditingController>> _rows = [];
 
   @override
@@ -32,8 +29,7 @@ class _RowAddState extends State<RowAdd> {
       for (var item in widget.items!) {
         _rows.add({
           "date": TextEditingController(text: item.date ?? ''),
-          "hours": TextEditingController(text: '${item.hour ?? 0}'),
-          "km": TextEditingController(text: '${item.km ?? 0}'),
+          "content": TextEditingController(text: item.content ?? ''),
         });
       }
     } else {
@@ -49,8 +45,7 @@ class _RowAddState extends State<RowAdd> {
       _rows.add({
         "date":
             TextEditingController(text: '${now.day}/${now.month}/${now.year}'),
-        "hours": TextEditingController(text: '0'),
-        "km": TextEditingController(text: '0'),
+        "content": TextEditingController(text: ''),
       });
     });
     _notifyParent();
@@ -63,12 +58,11 @@ class _RowAddState extends State<RowAdd> {
     _notifyParent();
   }
 
-  List<RowTime> getData() {
+  List<UuDaiTime> getData() {
     return _rows.map((row) {
-      return RowTime(
+      return UuDaiTime(
         date: row["date"]!.text,
-        hour: row["hours"]!.text.toIntSafe(),
-        km: row["km"]!.text.toIntSafe(),
+        content: row["content"]!.text,
       );
     }).toList();
   }
@@ -88,7 +82,7 @@ class _RowAddState extends State<RowAdd> {
       child: Row(
         children: [
           Expanded(
-            flex: 4,
+            flex: 1,
             child: SizedBox(
               height: 45,
               child: TextField(
@@ -121,61 +115,23 @@ class _RowAddState extends State<RowAdd> {
           ),
           const SizedBox(width: 8),
           Expanded(
-            flex: 3,
+            flex: 2,
             child: SizedBox(
               height: 45,
               child: TextField(
-                controller: row["hours"],
-                keyboardType: TextInputType.number,
+                controller: row["content"],
+                keyboardType: TextInputType.text,
                 textAlign: TextAlign.center,
                 decoration: const InputDecoration(
                   enabledBorder: enabledBorder,
                   focusedBorder: focusedBorder,
                   contentPadding: EdgeInsets.all(2),
-                  suffixIcon: Center(
-                    widthFactor: 1.0,
-                    child: Text(
-                      'Giờ',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ),
+                  hintText: 'Nhập nội dung',
                 ),
                 onChanged: (_) => _notifyParent(),
               ),
             ),
           ),
-          const SizedBox(width: 8),
-          if (widget.enabledKm ?? true)
-            Expanded(
-              flex: 3,
-              child: SizedBox(
-                height: 45,
-                child: TextField(
-                  controller: row["km"],
-                  keyboardType: TextInputType.number,
-                  textAlign: TextAlign.center,
-                  decoration: const InputDecoration(
-                    enabledBorder: enabledBorder,
-                    focusedBorder: focusedBorder,
-                    contentPadding: EdgeInsets.all(2),
-                    suffixIcon: Center(
-                      widthFactor: 1.0,
-                      child: Text(
-                        'Km',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
-                  ),
-                  onChanged: (_) => _notifyParent(),
-                ),
-              ),
-            ),
           IconButton(
             onPressed: () {
               if (index == _rows.length - 1) {
@@ -196,16 +152,6 @@ class _RowAddState extends State<RowAdd> {
 
   @override
   Widget build(BuildContext context) {
-    final totalHours = _rows.fold<int>(
-      0,
-      (sum, row) => sum + row["hours"]!.text.toIntSafe(),
-    );
-
-    final totalKm = _rows.fold<int>(
-      0,
-      (sum, row) => sum + row["km"]!.text.toIntSafe(),
-    );
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -213,7 +159,7 @@ class _RowAddState extends State<RowAdd> {
         Padding(
           padding: const EdgeInsets.only(bottom: 5),
           child: Text(
-            '${widget.title}: $totalHours giờ - $totalKm km',
+            '${widget.title}:',
             style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ),

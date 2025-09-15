@@ -39,12 +39,13 @@ class UserModel extends ChangeNotifier {
   }
 
   Future<bool> login(username, password) async {
-    var url = Uri.http(Const.baseUrl, 'qlhv-car/us-central1/api/login');
+    var url = Const.isDebug
+        ? Uri.http(Const.baseUrl, 'qlhv-car/us-central1/api/login')
+        : Uri.https(Const.baseUrl, 'login');
     final resp = await http.post(url, body: {
       'username': username,
       'password': password,
     });
-
     final data = json.decode(resp.body);
     if (resp.statusCode != 200) {
       final message = data['message'];

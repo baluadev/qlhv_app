@@ -40,6 +40,70 @@ class RowTime {
   }
 }
 
+class TraGopTime {
+  final String? date;
+  final int? money;
+
+  TraGopTime({
+    this.date,
+    this.money,
+  });
+
+  /// Convert từ Map (json) sang RowTime
+  factory TraGopTime.fromJson(Map<String, dynamic> json) {
+    return TraGopTime(
+      date: json['date'] as String?,
+      money: json['money'] is int
+          ? json['money']
+          : int.tryParse('${json['money']}'),
+    );
+  }
+
+  /// Convert RowTime sang Map (json)
+  Map<String, dynamic> toJson() {
+    return {
+      'date': date,
+      'money': money,
+    };
+  }
+
+  @override
+  String toString() {
+    return 'TraGopTime(date: $date, money: $money)';
+  }
+}
+
+class UuDaiTime {
+  final String? date;
+  final String? content;
+
+  UuDaiTime({
+    this.date,
+    this.content,
+  });
+
+  /// Convert từ Map (json) sang RowTime
+  factory UuDaiTime.fromJson(Map<String, dynamic> json) {
+    return UuDaiTime(
+      date: json['date'] as String?,
+      content: json['content'] as String?,
+    );
+  }
+
+  /// Convert RowTime sang Map (json)
+  Map<String, dynamic> toJson() {
+    return {
+      'date': date,
+      'content': content,
+    };
+  }
+
+  @override
+  String toString() {
+    return 'UuDaiTime(date: $date, content: $content)';
+  }
+}
+
 class ProfileModel {
   final String? profileId;
   final String? hovaten;
@@ -51,8 +115,10 @@ class ProfileModel {
   final String? ngaykhaigiang;
   final String? nguonHV;
   final String? giaovienDAT;
+  final String? theGiaoVien;
   final String? xeDAT;
   final String? loaiHocPhi;
+  final List<TraGopTime>? traGop;
   final int? online;
   final int? taptrung;
   final int? kiemtralythuyet;
@@ -62,7 +128,9 @@ class ProfileModel {
   final List<RowTime>? chayDAT;
   final List<RowTime>? saHinh;
   final List<RowTime>? hocChip;
-  final String? uudai;
+  final int? thiTotNghiep;
+  final String? ngayTotNghiep;
+  final List<UuDaiTime>? uudai;
   final String? note;
   ProfileModel({
     this.profileId,
@@ -75,8 +143,10 @@ class ProfileModel {
     this.ngaykhaigiang,
     this.nguonHV,
     this.giaovienDAT,
+    this.theGiaoVien,
     this.xeDAT,
     this.loaiHocPhi,
+    this.traGop,
     this.online,
     this.taptrung,
     this.kiemtralythuyet,
@@ -86,8 +156,10 @@ class ProfileModel {
     this.chayDAT,
     this.saHinh,
     this.hocChip,
+    this.thiTotNghiep,
     this.uudai,
     this.note,
+    this.ngayTotNghiep,
   });
 
   factory ProfileModel.fromJson(Map<String, dynamic> json) {
@@ -102,8 +174,12 @@ class ProfileModel {
       ngaykhaigiang: json['ngaykhaigiang'] as String?,
       nguonHV: json['nguonHV'] as String?,
       giaovienDAT: json['giaovienDAT'] as String?,
+      theGiaoVien: json['theGiaoVien'] as String?,
       xeDAT: json['xeDAT'] as String?,
       loaiHocPhi: json['loaiHocPhi'] as String?,
+      traGop: (json['traGop'] as List<dynamic>?)
+          ?.map((e) => TraGopTime.fromJson(e as Map<String, dynamic>))
+          .toList(),
       online: json['online'] as int?,
       taptrung: json['taptrung'] as int?,
       kiemtralythuyet: json['kiemtralythuyet'] as int?,
@@ -121,8 +197,12 @@ class ProfileModel {
       hocChip: (json['hocChip'] as List<dynamic>?)
           ?.map((e) => RowTime.fromJson(e as Map<String, dynamic>))
           .toList(),
-      uudai: json['uudai'] as String?,
+      thiTotNghiep: json['thiTotNghiep'] as int?,
+      uudai: (json['uudai'] as List<dynamic>?)
+          ?.map((e) => UuDaiTime.fromJson(e as Map<String, dynamic>))
+          .toList(),
       note: json['note'] as String?,
+      ngayTotNghiep: json['ngayTotNghiep'] as String?,
     );
   }
 
@@ -138,8 +218,10 @@ class ProfileModel {
       'ngaykhaigiang': ngaykhaigiang,
       'nguonHV': nguonHV,
       'giaovienDAT': giaovienDAT,
+      'theGiaoVien': theGiaoVien,
       'xeDAT': xeDAT,
       'loaiHocPhi': loaiHocPhi,
+      'traGop': traGop?.map((e) => e.toJson()).toList(),
       'online': online,
       'taptrung': taptrung,
       'kiemtralythuyet': kiemtralythuyet,
@@ -149,8 +231,10 @@ class ProfileModel {
       'chayDAT': chayDAT?.map((e) => e.toJson()).toList(),
       'saHinh': saHinh?.map((e) => e.toJson()).toList(),
       'hocChip': hocChip?.map((e) => e.toJson()).toList(),
-      'uudai': uudai,
+      'thiTotNghiep': thiTotNghiep,
+      'uudai': uudai?.map((e) => e.toJson()).toList(),
       'note': note,
+      'ngayTotNghiep': ngayTotNghiep,
     };
   }
 
@@ -158,7 +242,9 @@ class ProfileModel {
   String toString() => jsonEncode(toJson());
 
   Future<bool> add(ProfileModel profile) async {
-    var url = Uri.http(Const.baseUrl, 'qlhv-car/us-central1/api/profile/add');
+    final url = Const.isDebug
+        ? Uri.http(Const.baseUrl, 'qlhv-car/us-central1/api/profile/add')
+        : Uri.https(Const.baseUrl, 'profile/add');
     final resp = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -167,6 +253,7 @@ class ProfileModel {
         'profile': profile.toJson(),
       }),
     );
+    print(resp.body);
     final data = json.decode(resp.body);
     if (resp.statusCode != 200) {
       final message = data['message'];
@@ -178,9 +265,10 @@ class ProfileModel {
   }
 
   Future<bool> update(String profileId, ProfileModel profile) async {
-    var url = Uri.http(
-        Const.baseUrl, 'qlhv-car/us-central1/api/profile/update/$profileId');
-
+    final url = Const.isDebug
+        ? Uri.http(
+            Const.baseUrl, 'qlhv-car/us-central1/api/profile/update/$profileId')
+        : Uri.https(Const.baseUrl, 'profile/update/$profileId');
     final resp = await http.put(
       url,
       headers: {"Content-Type": "application/json"},
@@ -201,11 +289,17 @@ class ProfileModel {
   Future<List<ProfileModel>> search(String keyword) async {
     final userId = LocalStore.inst.getUser()?.id ?? '';
     try {
-      final url = Uri.http(
-        Const.baseUrl,
-        'qlhv-car/us-central1/api/profile/search/$userId',
-        {'keyword': keyword}, // query string
-      );
+      final url = Const.isDebug
+          ? Uri.http(
+              Const.baseUrl,
+              'qlhv-car/us-central1/api/profile/search/$userId',
+              {'keyword': keyword},
+            )
+          : Uri.https(
+              Const.baseUrl,
+              'profile/search/$userId',
+              {'keyword': keyword},
+            );
       final resp = await http.get(url);
       final data = json.decode(resp.body);
       print(data);
@@ -226,10 +320,15 @@ class ProfileModel {
   Future<ProfileModel?> getProfile(String profileId) async {
     try {
       print(profileId);
-      final url = Uri.http(
-        Const.baseUrl,
-        'qlhv-car/us-central1/api/profile/detail/$profileId',
-      );
+      final url = Const.isDebug
+          ? Uri.http(
+              Const.baseUrl,
+              'qlhv-car/us-central1/api/profile/detail/$profileId',
+            )
+          : Uri.https(
+              Const.baseUrl,
+              'profile/detail/$profileId',
+            );
       final resp = await http.get(url);
       print(resp.body);
       final data = json.decode(resp.body);

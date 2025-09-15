@@ -1,12 +1,16 @@
-import 'package:drop_down_list/drop_down_list.dart';
-import 'package:drop_down_list/model/selected_list_item.dart';
 import 'package:flutter/material.dart';
 import 'package:qlhv_app/helper/dialog_helper.dart';
 import 'package:qlhv_app/models/profile_model.dart';
+import 'package:qlhv_app/services/local_store.dart';
 
+import 'date_textfield.dart';
 import 'enums.dart';
+import 'helper/drop_down_list/drop_down_list.dart';
+import 'helper/drop_down_list/model/selected_list_item.dart';
 import 'row_add.dart';
 import 'status_widget.dart';
+import 'tragop_add.dart';
+import 'uudai_add.dart';
 
 class AddProfileScreen extends StatefulWidget {
   const AddProfileScreen({super.key});
@@ -32,6 +36,10 @@ class _AddProfileScreenState extends State<AddProfileScreen> {
   int kiemtralythuyet = 2;
   int kiemtramophong = 2;
   int hoCabin = 2;
+  int thiTotNghiep = 2;
+
+  List<TraGopTime> traGopData = [];
+  List<UuDaiTime> uudaiData = [];
 
   @override
   void initState() {
@@ -62,6 +70,15 @@ class _AddProfileScreenState extends State<AddProfileScreen> {
           kiemtralythuyet = profile?.kiemtralythuyet ?? 2;
           kiemtramophong = profile?.kiemtramophong ?? 2;
           hoCabin = profile?.cabin ?? 2;
+          thiTotNghiep = profile?.thiTotNghiep ?? 2;
+
+          hocVoData = profile?.hocVo ?? [];
+          chayDATData = profile?.chayDAT ?? [];
+          saHinhData = profile?.saHinh ?? [];
+          hocChipData = profile?.hocChip ?? [];
+          controllers[8].text = profile?.note ?? "";
+          controllers[9].text = profile?.ngayTotNghiep ?? '';
+          controllers[10].text = profile?.theGiaoVien ?? '';
         });
       }
     });
@@ -139,6 +156,107 @@ class _AddProfileScreenState extends State<AddProfileScreen> {
     ).showModal(context);
   }
 
+  final GlobalKey<MainBodyState> dropDownKey = GlobalKey();
+
+  List<String> getOptions(TypeNguon type) {
+    return type == TypeNguon.teacher
+        ? LocalStore.inst.getTeachers()
+        : LocalStore.inst.getCars();
+  }
+
+  void onTextFieldTap2(TypeNguon type, TextEditingController controller) {
+    DropDownState<String>(
+      dropDown: DropDown<String>(
+        key: dropDownKey,
+        enableAdd: true,
+        addButtonText: 'Thêm mới',
+        onAddButtonPressed: () async {
+          final result = await _showInputDialog('Thêm mới');
+          if (result != null && result.isNotEmpty) {
+            setState(() {
+              type == TypeNguon.teacher
+                  ? LocalStore.inst.addTeacher(result)
+                  : LocalStore.inst.addCar(result);
+              controller.text = result;
+            });
+            Navigator.pop(context);
+          }
+        },
+        searchHintText: 'Tìm kiếm',
+        data: getOptions(type)
+            .map((e) => SelectedListItem<String>(
+                  data: e,
+                ))
+            .toList(),
+        listItemBuilder: (index, dataItem) => Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(dataItem.data),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.edit, size: 16),
+                  onPressed: () async {
+                    final result =
+                        await _showInputDialog('Chỉnh sửa', dataItem.data);
+                    if (result != null && result.isNotEmpty) {
+                      setState(() {
+                        type == TypeNguon.teacher
+                            ? LocalStore.inst.editTeacher(index, result)
+                            : LocalStore.inst.editCar(index, result);
+                        controller.text = result;
+                      });
+                      Navigator.pop(context);
+                    }
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(
+                    Icons.delete,
+                    size: 16,
+                    color: Colors.red,
+                  ),
+                  onPressed: () async {
+                    type == TypeNguon.teacher
+                        ? await LocalStore.inst.removeTeacher(dataItem.data)
+                        : await LocalStore.inst.removeCar(dataItem.data);
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            )
+          ],
+        ),
+        onSelected: (selectedItems) {
+          if (selectedItems.isNotEmpty) {
+            controller.text = selectedItems.first.data;
+          }
+        },
+      ),
+    ).showModal(context);
+  }
+
+  Future<String?> _showInputDialog(String title, [String? initialValue]) async {
+    final controller = TextEditingController(text: initialValue);
+    return await showDialog<String>(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: Text(title),
+          content: TextField(controller: controller, autofocus: true),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(ctx), child: const Text('Hủy')),
+            TextButton(
+                onPressed: () => Navigator.pop(ctx, controller.text),
+                child: const Text('OK')),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     const enabledBorder = OutlineInputBorder();
@@ -148,337 +266,336 @@ class _AddProfileScreenState extends State<AddProfileScreen> {
       fontWeight: FontWeight.bold,
     );
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("${profile == null ? 'Thêm' : 'Sửa'} thông tin học viên"),
-      ),
-      body: ListView(
-        children: [
-          ExpansionTile(
-            title: const Text(
-              '1. Thông tin cá nhân',
-              style: styleTitle,
-            ),
-            onExpansionChanged: (expanded) {},
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: TextField(
-                  controller: controllers[0],
-                  decoration: const InputDecoration(
-                    enabledBorder: enabledBorder,
-                    focusedBorder: focusedBorder,
-                    hintText: 'Nhập họ và tên',
-                  ),
-                ),
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text("${profile == null ? 'Thêm' : 'Sửa'} thông tin học viên"),
+        ),
+        body: ListView(
+          children: [
+            ExpansionTile(
+              title: const Text(
+                '1. Thông tin cá nhân',
+                style: styleTitle,
               ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: TextField(
-                  controller: controllers[1],
-                  readOnly: true,
-                  decoration: const InputDecoration(
-                    enabledBorder: enabledBorder,
-                    focusedBorder: focusedBorder,
-                    hintText: 'Nhập ngày sinh',
-                  ),
-                  onTap: () async {
-                    DateTime? picked = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime(2000),
-                      firstDate: DateTime(1900),
-                      lastDate: DateTime.now(),
-                      locale: const Locale("vi", "VN"),
-                    );
-                    if (picked != null) {
-                      controllers[1].text =
-                          "${picked.day}/${picked.month}/${picked.year}";
-                    }
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: TextField(
-                  controller: controllers[2],
-                  keyboardType: TextInputType.number,
-                  maxLength: 12,
-                  decoration: const InputDecoration(
-                    enabledBorder: enabledBorder,
-                    focusedBorder: focusedBorder,
-                    counterText: '',
-                    hintText: 'Nhập CCCD',
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: TextField(
-                  controller: controllers[3],
-                  keyboardType: TextInputType.phone,
-                  decoration: const InputDecoration(
-                    enabledBorder: enabledBorder,
-                    focusedBorder: focusedBorder,
-                    hintText: 'Nhập SDT',
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: TextField(
-                  controller: controllers[4],
-                  decoration: const InputDecoration(
-                    enabledBorder: enabledBorder,
-                    focusedBorder: focusedBorder,
-                    hintText: 'Nhập địa chỉ',
-                  ),
-                ),
-              ),
-            ],
-          ),
-          ExpansionTile(
-            title: const Text(
-              '2. Thông tin lớp học',
-              style: styleTitle,
-            ),
-            onExpansionChanged: (expanded) {},
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: TextField(
-                  controller: controllers[5],
-                  decoration: const InputDecoration(
-                    enabledBorder: enabledBorder,
-                    focusedBorder: focusedBorder,
-                    hintText: 'Nhập lớp học',
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: TextField(
-                  controller: controllers[6],
-                  readOnly: true,
-                  decoration: const InputDecoration(
-                    enabledBorder: enabledBorder,
-                    focusedBorder: focusedBorder,
-                    hintText: 'Nhập ngày khai giảng',
-                  ),
-                  onTap: () async {
-                    DateTime? picked = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime(2000),
-                      firstDate: DateTime(1900),
-                      lastDate: DateTime.now(),
-                    );
-                    if (picked != null) {
-                      controllers[6].text =
-                          "${picked.day}/${picked.month}/${picked.year}";
-                    }
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: AppTextField(
-                  textEditingController: controllers2[0],
-                  title: 'Nguồn học viên',
-                  hint: 'Chọn nguồn học viên',
-                  isReadOnly: true,
-                  onTextFieldTap: () =>
-                      onTextFieldTap<NguonHV>(NguonHV.values, controllers2[0]),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: AppTextField(
-                  textEditingController: controllers2[1],
-                  title: 'Giáo viên dạy DAT',
-                  hint: 'Chọn giáo viên dạy DAT',
-                  isReadOnly: true,
-                  onTextFieldTap: () => onTextFieldTap<GiaoVienDAT>(
-                      GiaoVienDAT.values, controllers2[1]),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: AppTextField(
-                  textEditingController: controllers2[2],
-                  title: 'Xe dạy DAT',
-                  hint: 'Chọn xe dạy DAT',
-                  isReadOnly: true,
-                  onTextFieldTap: () =>
-                      onTextFieldTap<XeDAT>(XeDAT.values, controllers2[2]),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: AppTextField(
-                  textEditingController: controllers2[3],
-                  title: 'Cách thức đóng học phí',
-                  hint: 'Chọn cách thức đóng học phí',
-                  isReadOnly: true,
-                  onTextFieldTap: () => onTextFieldTap<LoaiHocPhi>(
-                      LoaiHocPhi.values, controllers2[3]),
-                ),
-              ),
-            ],
-          ),
-          ExpansionTile(
-            title: const Text(
-              '3. Lộ trình học lý thuyết',
-              style: styleTitle,
-            ),
-            onExpansionChanged: (expanded) {},
-            children: [
-              ...LyThuyet.values.map(
-                (e) => Padding(
+              onExpansionChanged: (expanded) {},
+              children: [
+                Padding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                  child: StatusWidget(
-                    title: e.text,
-                    value: getLyThuyetValue(e),
+                  child: TextField(
+                    controller: controllers[0],
+                    decoration: const InputDecoration(
+                      enabledBorder: enabledBorder,
+                      focusedBorder: focusedBorder,
+                      hintText: 'Nhập họ và tên',
+                    ),
+                  ),
+                ),
+                DateTextField(
+                  controller: controllers[1],
+                  hintText: 'Nhập ngày sinh',
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: TextField(
+                    controller: controllers[2],
+                    keyboardType: TextInputType.number,
+                    maxLength: 12,
+                    decoration: const InputDecoration(
+                      enabledBorder: enabledBorder,
+                      focusedBorder: focusedBorder,
+                      counterText: '',
+                      hintText: 'Nhập CCCD',
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: TextField(
+                    controller: controllers[3],
+                    keyboardType: TextInputType.phone,
+                    decoration: const InputDecoration(
+                      enabledBorder: enabledBorder,
+                      focusedBorder: focusedBorder,
+                      hintText: 'Nhập SDT',
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: TextField(
+                    controller: controllers[4],
+                    decoration: const InputDecoration(
+                      enabledBorder: enabledBorder,
+                      focusedBorder: focusedBorder,
+                      hintText: 'Nhập địa chỉ',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            ExpansionTile(
+              title: const Text(
+                '2. Thông tin lớp học',
+                style: styleTitle,
+              ),
+              onExpansionChanged: (expanded) {},
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: TextField(
+                    controller: controllers[5],
+                    decoration: const InputDecoration(
+                      enabledBorder: enabledBorder,
+                      focusedBorder: focusedBorder,
+                      hintText: 'Nhập lớp học',
+                    ),
+                  ),
+                ),
+                DateTextField(
+                  controller: controllers[6],
+                  hintText: 'Nhập ngày khai giảng',
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: AppTextField(
+                    textEditingController: controllers2[0],
+                    title: 'Nguồn học viên',
+                    hint: 'Chọn nguồn học viên',
+                    isReadOnly: true,
+                    onTextFieldTap: () => onTextFieldTap<NguonHV>(
+                        NguonHV.values, controllers2[0]),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: AppTextField(
+                    textEditingController: controllers2[1],
+                    title: 'Giáo viên dạy DAT',
+                    hint: 'Chọn giáo viên dạy DAT',
+                    isReadOnly: true,
+                    onTextFieldTap: () => onTextFieldTap2(
+                      TypeNguon.teacher,
+                      controllers2[1],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: TextField(
+                    controller: controllers[10],
+                    decoration: const InputDecoration(
+                      enabledBorder: enabledBorder,
+                      focusedBorder: focusedBorder,
+                      hintText: 'Nhập thẻ giáo viên',
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: AppTextField(
+                    textEditingController: controllers2[2],
+                    title: 'Xe dạy DAT',
+                    hint: 'Chọn xe dạy DAT',
+                    isReadOnly: true,
+                    onTextFieldTap: () =>
+                        onTextFieldTap2(TypeNguon.car, controllers2[2]),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: AppTextField(
+                    textEditingController: controllers2[3],
+                    title: 'Cách thức đóng học phí',
+                    hint: 'Chọn cách thức đóng học phí',
+                    isReadOnly: true,
+                    onTextFieldTap: () => onTextFieldTap<LoaiHocPhi>(
+                        LoaiHocPhi.values, controllers2[3]),
+                  ),
+                ),
+                if (controllers2[3].text == LoaiHocPhi.tragop.text)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    child: TraGopAdd(
+                      title: 'Trả góp',
+                      items: profile?.traGop,
+                      onChanged: (p0) {
+                        traGopData = p0;
+                      },
+                    ),
+                  ),
+              ],
+            ),
+            ExpansionTile(
+              title: const Text(
+                '3. Lộ trình học lý thuyết',
+                style: styleTitle,
+              ),
+              onExpansionChanged: (expanded) {},
+              children: [
+                ...LyThuyet.values.map(
+                  (e) => Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    child: StatusWidget(
+                      title: e.text,
+                      value: getLyThuyetValue(e),
+                      onChanged: (p0) {
+                        setLyThuyetValue(e, p0);
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            ExpansionTile(
+              title: const Text(
+                '4. Lộ trình học thực hành',
+                style: styleTitle,
+              ),
+              onExpansionChanged: (expanded) {},
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: RowAdd(
+                    title: 'Học Vỡ',
+                    items: hocVoData,
                     onChanged: (p0) {
-                      setLyThuyetValue(e, p0);
+                      hocVoData = p0;
                     },
                   ),
                 ),
-              ),
-            ],
-          ),
-          ExpansionTile(
-            title: const Text(
-              '4. Lộ trình học thực hành',
-              style: styleTitle,
-            ),
-            onExpansionChanged: (expanded) {},
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: RowAdd(
-                  title: 'Học Vỡ',
-                  items: profile?.hocVo,
-                  onChanged: (p0) {
-                    hocVoData = p0;
-                  },
-                ),
-              ),
-              const SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: RowAdd(
-                  title: 'Chạy DAT',
-                  items: profile?.chayDAT,
-                  onChanged: (p0) {
-                    chayDATData = p0;
-                  },
-                ),
-              ),
-              const SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: RowAdd(
-                  title: 'Học Sa hình',
-                  items: profile?.saHinh,
-                  onChanged: (p0) {
-                    saHinhData = p0;
-                  },
-                ),
-              ),
-              const SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: RowAdd(
-                  title: 'Học Chip',
-                  items: profile?.hocChip,
-                  onChanged: (p0) {
-                    hocChipData = p0;
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: StatusWidget(
-                  title: 'Thi tốt nghiệp',
-                  onChanged: (p0) {},
-                ),
-              ),
-            ],
-          ),
-          ExpansionTile(
-            title: const Text(
-              '5. Thông tin bổ sung',
-              style: styleTitle,
-            ),
-            onExpansionChanged: (expanded) {},
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: TextField(
-                  controller: controllers[7],
-                  decoration: const InputDecoration(
-                    enabledBorder: enabledBorder,
-                    focusedBorder: focusedBorder,
-                    hintText: 'Nhập ưu đãi 1', // thêm nhiều dòng (text area)
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: RowAdd(
+                    title: 'Chạy DAT',
+                    enabledKm: true,
+                    items: chayDATData,
+                    onChanged: (p0) {
+                      chayDATData = p0;
+                    },
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: TextField(
-                  controller: controllers[8],
-                  decoration: const InputDecoration(
-                    enabledBorder: enabledBorder,
-                    focusedBorder: focusedBorder,
-                    hintText:
-                        'ghi chú', // thêm ưu đãi nhiều dòng (text area), thêm checkbox
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: RowAdd(
+                    title: 'Học Sa hình',
+                    items: saHinhData,
+                    onChanged: (p0) {
+                      saHinhData = p0;
+                    },
                   ),
                 ),
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: RowAdd(
+                    title: 'Học Chip',
+                    items: hocChipData,
+                    onChanged: (p0) {
+                      hocChipData = p0;
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: StatusWidget(
+                    title: 'Thi tốt nghiệp',
+                    onChanged: (p0) {
+                      thiTotNghiep = p0;
+                    },
+                  ),
+                ),
+                DateTextField(
+                  controller: controllers[9],
+                  hintText: 'Nhập ngày tốt nghiệp',
+                ),
+              ],
+            ),
+            ExpansionTile(
+              title: const Text(
+                '5. Thông tin bổ sung',
+                style: styleTitle,
               ),
-            ],
-          ),
-        ],
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ElevatedButton(
-          onPressed: () async {
-            DialogHelper.showLoading();
-            final newProfile = ProfileModel(
-              profileId: profile?.profileId,
-              hovaten: controllers[0].text,
-              ngaysinh: controllers[1].text,
-              cccd: controllers[2].text,
-              sdt: controllers[3].text,
-              diachi: controllers[4].text,
-              lophoc: controllers[5].text,
-              ngaykhaigiang: controllers[6].text,
-              nguonHV: controllers2[0].text,
-              giaovienDAT: controllers2[1].text,
-              xeDAT: controllers2[2].text,
-              loaiHocPhi: controllers2[3].text,
-              online: hocOnline,
-              taptrung: hocTapTrung,
-              kiemtralythuyet: kiemtralythuyet,
-              kiemtramophong: kiemtramophong,
-              cabin: hoCabin,
-              hocVo: hocVoData,
-              chayDAT: chayDATData,
-              saHinh: saHinhData,
-              hocChip: hocChipData,
-              uudai: controllers[7].text,
-              note: controllers[8].text,
-            );
-            if (profile == null) {
-              await _profileModel.add(newProfile);
-            } else {
-              await _profileModel.update(profile!.profileId!, newProfile);
-            }
+              onExpansionChanged: (expanded) {},
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: UuDaiAdd(
+                    title: 'Ưu đãi',
+                    items: profile?.uudai,
+                    onChanged: (p0) {
+                      uudaiData = p0;
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: TextField(
+                    controller: controllers[8],
+                    decoration: const InputDecoration(
+                      enabledBorder: enabledBorder,
+                      focusedBorder: focusedBorder,
+                      hintText:
+                          'ghi chú', // thêm ưu đãi nhiều dòng (text area), thêm checkbox
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        bottomNavigationBar: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: ElevatedButton(
+            onPressed: () async {
+              DialogHelper.showLoading();
+              final newProfile = ProfileModel(
+                profileId: profile?.profileId,
+                hovaten: controllers[0].text,
+                ngaysinh: controllers[1].text,
+                cccd: controllers[2].text,
+                sdt: controllers[3].text,
+                diachi: controllers[4].text,
+                lophoc: controllers[5].text,
+                ngaykhaigiang: controllers[6].text,
+                nguonHV: controllers2[0].text,
+                giaovienDAT: controllers2[1].text,
+                xeDAT: controllers2[2].text,
+                loaiHocPhi: controllers2[3].text,
+                traGop: traGopData,
+                online: hocOnline,
+                taptrung: hocTapTrung,
+                kiemtralythuyet: kiemtralythuyet,
+                kiemtramophong: kiemtramophong,
+                cabin: hoCabin,
+                hocVo: hocVoData,
+                chayDAT: chayDATData,
+                saHinh: saHinhData,
+                hocChip: hocChipData,
+                thiTotNghiep: thiTotNghiep,
+                ngayTotNghiep: controllers[9].text,
+                uudai: uudaiData,
+                note: controllers[8].text,
+                theGiaoVien: controllers[10].text,
+              );
+              if (profile == null) {
+                await _profileModel.add(newProfile);
+              } else {
+                await _profileModel.update(profile!.profileId!, newProfile);
+              }
 
-            await Future.delayed(const Duration(milliseconds: 300));
-            DialogHelper.hideLoading();
-            Navigator.pop(context);
-          },
-          child: Text(profile == null ? 'Lưu' : 'Cập nhật'),
+              await Future.delayed(const Duration(milliseconds: 300));
+              DialogHelper.hideLoading();
+              Navigator.pop(context);
+            },
+            child: Text(profile == null ? 'Lưu' : 'Cập nhật'),
+          ),
         ),
       ),
     );
