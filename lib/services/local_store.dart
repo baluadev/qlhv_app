@@ -10,6 +10,7 @@ class LocalStore {
   final String _user = 'user';
   final String _teacher = 'teacher';
   final String _cars = 'cars';
+  final String _cards = 'cards';
 
   late SharedPreferences prefs;
   Future<void> init() async {
@@ -92,6 +93,38 @@ class LocalStore {
     }
     currentList[index] = value;
     return await prefs.setStringList(_cars, currentList);
+  }
+
+
+  List<String> getCards() {
+    return prefs.getStringList(_cards) ?? [];
+  }
+
+  Future<bool> addCard(String value) async {
+    final currentList = getCards();
+    if (currentList.contains(value)) {
+      return true;
+    }
+    currentList.add(value);
+    return await prefs.setStringList(_cards, currentList);
+  }
+
+  Future<bool> removeCard(String value) async {
+    final currentList = getCards();
+    if (!currentList.contains(value)) {
+      return true;
+    }
+    currentList.remove(value);
+    return await prefs.setStringList(_cards, currentList);
+  }
+
+  Future<bool> editCard(int index, String value) async {
+    final currentList = getCards();
+    if (index < 0 || index >= currentList.length) {
+      return false;
+    }
+    currentList[index] = value;
+    return await prefs.setStringList(_cards, currentList);
   }
 
   Future<bool> clear() async {

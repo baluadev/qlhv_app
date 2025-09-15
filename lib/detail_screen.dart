@@ -69,7 +69,7 @@ class _DetailScreenState extends State<DetailScreen> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(vertical: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -383,14 +383,19 @@ class UuDaiTable extends StatelessWidget {
                 verticalInside: BorderSide(color: Colors.grey.shade300),
               ),
               columns: const [
-                DataColumn(label: Text("Ngày")),
-                DataColumn(label: Text("Nội dung")),
+                DataColumn(label: Center(child: Text("Mục"))),
+                DataColumn(label: Center(child: Text("Nội dung"))),
+                DataColumn(label: Center(child: Text("Trạng thái"))),
               ],
               rows: [
                 ...data.map(
                   (row) => DataRow(cells: [
-                    DataCell(Center(child: Text('${row.date}'))),
+                    DataCell(Center(child: Text('${row.title}'))),
                     DataCell(Center(child: Text('${row.content}'))),
+                    DataCell(Center(
+                        child: Text(row.checked ?? false
+                            ? 'Hoàn thành'
+                            : 'Chưa hoàn thành'))),
                   ]),
                 ),
               ]),

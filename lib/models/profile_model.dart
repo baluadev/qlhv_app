@@ -74,33 +74,37 @@ class TraGopTime {
 }
 
 class UuDaiTime {
-  final String? date;
+  final String? title;
   final String? content;
+  final bool? checked;
 
   UuDaiTime({
-    this.date,
+    this.title,
     this.content,
+    this.checked
   });
 
   /// Convert từ Map (json) sang RowTime
   factory UuDaiTime.fromJson(Map<String, dynamic> json) {
     return UuDaiTime(
-      date: json['date'] as String?,
+      title: json['title'] as String?,
       content: json['content'] as String?,
+      checked: json['checked'] as bool?,
     );
   }
 
   /// Convert RowTime sang Map (json)
   Map<String, dynamic> toJson() {
     return {
-      'date': date,
+      'title': title,
       'content': content,
+      'checked': checked,
     };
   }
 
   @override
   String toString() {
-    return 'UuDaiTime(date: $date, content: $content)';
+    return 'UuDaiTime(title: $title, content: $content, checked: $checked)';
   }
 }
 

@@ -18,7 +18,7 @@ class UuDaiAdd extends StatefulWidget {
 }
 
 class _UuDaiAddState extends State<UuDaiAdd> {
-  final List<Map<String, TextEditingController>> _rows = [];
+  final List<Map<String, dynamic>> _rows = [];
 
   @override
   void initState() {
@@ -28,8 +28,9 @@ class _UuDaiAddState extends State<UuDaiAdd> {
       // Nếu có data truyền vào thì fill luôn
       for (var item in widget.items!) {
         _rows.add({
-          "date": TextEditingController(text: item.date ?? ''),
+          "title": TextEditingController(text: item.title ?? ''),
           "content": TextEditingController(text: item.content ?? ''),
+          "checked": item.checked ?? false,
         });
       }
     } else {
@@ -40,12 +41,12 @@ class _UuDaiAddState extends State<UuDaiAdd> {
   }
 
   void _addRow() {
-    final now = DateTime.now();
     setState(() {
       _rows.add({
-        "date":
-            TextEditingController(text: '${now.day}/${now.month}/${now.year}'),
+        "title":
+            TextEditingController(text: ''),
         "content": TextEditingController(text: ''),
+        "checked": false,
       });
     });
     _notifyParent();
@@ -61,8 +62,9 @@ class _UuDaiAddState extends State<UuDaiAdd> {
   List<UuDaiTime> getData() {
     return _rows.map((row) {
       return UuDaiTime(
-        date: row["date"]!.text,
+        title: row["title"]!.text,
         content: row["content"]!.text,
+        checked: row["checked"],
       );
     }).toList();
   }
@@ -82,33 +84,19 @@ class _UuDaiAddState extends State<UuDaiAdd> {
       child: Row(
         children: [
           Expanded(
-            flex: 1,
+            flex: 2,
             child: SizedBox(
               height: 45,
               child: TextField(
-                controller: row["date"],
-                readOnly: true,
+                controller: row["title"],
+                keyboardType: TextInputType.text,
                 textAlign: TextAlign.center,
                 decoration: const InputDecoration(
                   enabledBorder: enabledBorder,
                   focusedBorder: focusedBorder,
-                  hintText: 'Nhập ngày',
                   contentPadding: EdgeInsets.all(2),
+                  hintText: 'Nhập tiêu đề',
                 ),
-                onTap: () async {
-                  DateTime? picked = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime(1900),
-                    lastDate: DateTime.now(),
-                    locale: const Locale("vi", "VN"),
-                  );
-                  if (picked != null) {
-                    row["date"]!.text =
-                        "${picked.day}/${picked.month}/${picked.year}";
-                    _notifyParent();
-                  }
-                },
                 onChanged: (_) => _notifyParent(),
               ),
             ),
@@ -132,6 +120,12 @@ class _UuDaiAddState extends State<UuDaiAdd> {
               ),
             ),
           ),
+          Checkbox(
+              value: row['checked'],
+              onChanged: (value) {
+                row['checked'] = value;
+                _notifyParent();
+              }),
           IconButton(
             onPressed: () {
               if (index == _rows.length - 1) {

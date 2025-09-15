@@ -25,6 +25,7 @@ enum NguonHV implements HasText {
 enum TypeNguon {
   teacher,
   car,
+  card,
 }
 
 //chỉ hiện thị khi nguồn học viên là giao viên

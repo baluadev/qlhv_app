@@ -64,6 +64,7 @@ class _AddProfileScreenState extends State<AddProfileScreen> {
           controllers2[1].text = profile?.giaovienDAT ?? '';
           controllers2[2].text = profile?.xeDAT ?? '';
           controllers2[3].text = profile?.loaiHocPhi ?? '';
+          controllers2[4].text = profile?.theGiaoVien ?? '';
 
           hocOnline = profile?.online ?? 2;
           hocTapTrung = profile?.taptrung ?? 2;
@@ -78,7 +79,6 @@ class _AddProfileScreenState extends State<AddProfileScreen> {
           hocChipData = profile?.hocChip ?? [];
           controllers[8].text = profile?.note ?? "";
           controllers[9].text = profile?.ngayTotNghiep ?? '';
-          controllers[10].text = profile?.theGiaoVien ?? '';
         });
       }
     });
@@ -159,9 +159,73 @@ class _AddProfileScreenState extends State<AddProfileScreen> {
   final GlobalKey<MainBodyState> dropDownKey = GlobalKey();
 
   List<String> getOptions(TypeNguon type) {
-    return type == TypeNguon.teacher
-        ? LocalStore.inst.getTeachers()
-        : LocalStore.inst.getCars();
+    switch (type) {
+      case TypeNguon.teacher:
+        return LocalStore.inst.getTeachers();
+      case TypeNguon.car:
+        return LocalStore.inst.getCars();
+      case TypeNguon.card:
+        return LocalStore.inst.getCards();
+      default:
+        return [];
+    }
+  }
+
+  Future<void> addOptions(TypeNguon type, String value) async {
+    switch (type) {
+      case TypeNguon.teacher:
+        await LocalStore.inst.addTeacher(value);
+        break;
+      case TypeNguon.car:
+        await LocalStore.inst.addCar(value);
+        break;
+      case TypeNguon.card:
+        await LocalStore.inst.addCard(value);
+        break;
+      default:
+        break;
+    }
+  }
+
+  void editOptions(TypeNguon type, int index, String value) {
+    switch (type) {
+      case TypeNguon.teacher:
+        LocalStore.inst.editTeacher(index, value);
+        break;
+      case TypeNguon.car:
+        LocalStore.inst.editCar(index, value);
+        break;
+      case TypeNguon.card:
+        LocalStore.inst.editCard(index, value);
+        break;
+      default:
+        break;
+    }
+  }
+
+  Future<void> removeOptions(TypeNguon type, String value) async {
+    switch (type) {
+      case TypeNguon.teacher:
+        await LocalStore.inst.removeTeacher(value);
+        if (getOptions(type).isEmpty) {
+          controllers2[1].text = '';
+        }
+        break;
+      case TypeNguon.car:
+        await LocalStore.inst.removeCar(value);
+        if (getOptions(type).isEmpty) {
+          controllers2[2].text = '';
+        }
+        break;
+      case TypeNguon.card:
+        await LocalStore.inst.removeCard(value);
+        if (getOptions(type).isEmpty) {
+          controllers2[4].text = '';
+        }
+        break;
+      default:
+        break;
+    }
   }
 
   void onTextFieldTap2(TypeNguon type, TextEditingController controller) {
@@ -174,9 +238,7 @@ class _AddProfileScreenState extends State<AddProfileScreen> {
           final result = await _showInputDialog('Thêm mới');
           if (result != null && result.isNotEmpty) {
             setState(() {
-              type == TypeNguon.teacher
-                  ? LocalStore.inst.addTeacher(result)
-                  : LocalStore.inst.addCar(result);
+              addOptions(type, result);
               controller.text = result;
             });
             Navigator.pop(context);
@@ -202,9 +264,7 @@ class _AddProfileScreenState extends State<AddProfileScreen> {
                         await _showInputDialog('Chỉnh sửa', dataItem.data);
                     if (result != null && result.isNotEmpty) {
                       setState(() {
-                        type == TypeNguon.teacher
-                            ? LocalStore.inst.editTeacher(index, result)
-                            : LocalStore.inst.editCar(index, result);
+                        editOptions(type, index, result);
                         controller.text = result;
                       });
                       Navigator.pop(context);
@@ -218,9 +278,7 @@ class _AddProfileScreenState extends State<AddProfileScreen> {
                     color: Colors.red,
                   ),
                   onPressed: () async {
-                    type == TypeNguon.teacher
-                        ? await LocalStore.inst.removeTeacher(dataItem.data)
-                        : await LocalStore.inst.removeCar(dataItem.data);
+                    removeOptions(type, dataItem.data);
                     Navigator.pop(context);
                   },
                 ),
@@ -386,12 +444,14 @@ class _AddProfileScreenState extends State<AddProfileScreen> {
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                  child: TextField(
-                    controller: controllers[10],
-                    decoration: const InputDecoration(
-                      enabledBorder: enabledBorder,
-                      focusedBorder: focusedBorder,
-                      hintText: 'Nhập thẻ giáo viên',
+                  child: AppTextField(
+                    textEditingController: controllers2[4],
+                    title: 'Thẻ Giáo viên',
+                    hint: 'Nhập thẻ giáo viên',
+                    isReadOnly: true,
+                    onTextFieldTap: () => onTextFieldTap2(
+                      TypeNguon.card,
+                      controllers2[4],
                     ),
                   ),
                 ),
@@ -568,6 +628,7 @@ class _AddProfileScreenState extends State<AddProfileScreen> {
                 giaovienDAT: controllers2[1].text,
                 xeDAT: controllers2[2].text,
                 loaiHocPhi: controllers2[3].text,
+                theGiaoVien: controllers2[4].text,
                 traGop: traGopData,
                 online: hocOnline,
                 taptrung: hocTapTrung,
@@ -582,7 +643,6 @@ class _AddProfileScreenState extends State<AddProfileScreen> {
                 ngayTotNghiep: controllers[9].text,
                 uudai: uudaiData,
                 note: controllers[8].text,
-                theGiaoVien: controllers[10].text,
               );
               if (profile == null) {
                 await _profileModel.add(newProfile);
