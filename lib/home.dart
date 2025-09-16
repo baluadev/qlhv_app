@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:qlhv_app/const.dart';
+import 'package:qlhv_app/enums.dart';
 import 'package:qlhv_app/helper/dialog_helper.dart';
 import 'package:qlhv_app/models/profile_model.dart';
 import 'package:qlhv_app/utils.dart';
@@ -96,8 +98,36 @@ class _HomeScreenState extends State<HomeScreen> {
                 itemCount: list.length,
                 itemBuilder: (context, index) {
                   final item = list[index];
+                  final countLT = Utils.countCompleted([
+                    item.online,
+                    item.taptrung,
+                    item.kiemtralythuyet,
+                    item.kiemtramophong,
+                    item.cabin
+                  ]);
 
-                  //phân biệt màu nguồn học viên
+                  final statusLT = countLT < 5 ? Status.failed : Status.passed;
+
+                  //
+                  final totalHoursTH = Utils.getTotalHours(
+                    hocVo: item.hocVo,
+                    chayDAT: item.chayDAT,
+                    saHinh: item.saHinh,
+                  );
+
+                  final totalKmsTH = Utils.getTotalKm(
+                    hocVo: item.hocVo,
+                    chayDAT: item.chayDAT,
+                    saHinh: item.saHinh,
+                  );
+
+                  final completedTh = (totalHoursTH >= Const.maxHours &&
+                          totalKmsTH >= Const.maxKms)
+                      ? Status.passed
+                      : Status.failed;
+
+                  final totalHoursChip = (item.hocChip ?? [])
+                      .fold<int>(0, (sum, item) => sum + (item.hour ?? 0));
 
                   return GestureDetector(
                     onTap: () async {
@@ -120,38 +150,19 @@ class _HomeScreenState extends State<HomeScreen> {
                           info('Khóa', item.lophoc),
                           info(
                             'Lý thuyết',
-                            '(${Utils.countCompleted([
-                                  item.online,
-                                  item.taptrung,
-                                  item.kiemtralythuyet,
-                                  item.kiemtramophong,
-                                  item.cabin
-                                ])}/5)',
-                            color: Colors.green,
+                            '($countLT/5)',
+                            color: statusLT == Status.passed
+                                ? Colors.green
+                                : Colors.red,
                           ),
                           info(
                             'Thực hành',
-                            '(${Utils.getTotalHours(
-                              hocVo: item.hocVo,
-                              chayDAT: item.chayDAT,
-                              saHinh: item.saHinh,
-                              hocChip: item.hocChip,
-                            )} giờ - ${Utils.getTotalKm(
-                              hocVo: item.hocVo,
-                              chayDAT: item.chayDAT,
-                              saHinh: item.saHinh,
-                              hocChip: item.hocChip,
-                            )} km)',
-                            color: Colors.green,
-                          ), // hiện thị tổng số giờ vs km của tất cả enum ThucHanh
-                          // Text('1. Học Vỡ (3h), '), //thêm nhiều dòng
-                          // Text(
-                          //     '2. Chạy DAT (số km + số giờ), '), //thêm nhiều dòng (ngày+ giờ + km)
-                          // Text(
-                          //     '3. Học sa hình ( số giờ), '), //thêm nhiều dòng (ngày + giờ)
-                          // Text('4. Thi tốt nghiệp ( passed), '),
-                          // Text(
-                          //     '5. Học Chip ( giờ), '), //thêm nhiều dòng (ngày + giờ )
+                            '($totalHoursTH giờ - $totalKmsTH km)',
+                            color: completedTh == Status.passed
+                                ? Colors.green
+                                : Colors.red,
+                          ),
+                          info('Học Chip', '$totalHoursChip giờ'),
                         ],
                       ),
                     ),

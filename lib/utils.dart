@@ -10,7 +10,6 @@ class Utils {
     List<RowTime>? hocVo,
     List<RowTime>? chayDAT,
     List<RowTime>? saHinh,
-    List<RowTime>? hocChip,
   }) {
     final totalHocVo =
         (hocVo ?? []).fold<int>(0, (sum, item) => sum + (item.hour ?? 0));
@@ -18,17 +17,14 @@ class Utils {
         (chayDAT ?? []).fold<int>(0, (sum, item) => sum + (item.hour ?? 0));
     final totalSaHinh =
         (saHinh ?? []).fold<int>(0, (sum, item) => sum + (item.hour ?? 0));
-    final totalHocChip =
-        (hocChip ?? []).fold<int>(0, (sum, item) => sum + (item.hour ?? 0));
 
-    return totalHocVo + totalChayDAT + totalSaHinh + totalHocChip;
+    return totalHocVo + totalChayDAT + totalSaHinh;
   }
 
   static int getTotalKm({
     List<RowTime>? hocVo,
     List<RowTime>? chayDAT,
     List<RowTime>? saHinh,
-    List<RowTime>? hocChip,
   }) {
     final totalHocVo =
         (hocVo ?? []).fold<int>(0, (sum, item) => sum + (item.km ?? 0));
@@ -36,9 +32,7 @@ class Utils {
         (chayDAT ?? []).fold<int>(0, (sum, item) => sum + (item.km ?? 0));
     final totalSaHinh =
         (saHinh ?? []).fold<int>(0, (sum, item) => sum + (item.km ?? 0));
-    final totalHocChip =
-        (hocChip ?? []).fold<int>(0, (sum, item) => sum + (item.km ?? 0));
 
-    return totalHocVo + totalChayDAT + totalSaHinh + totalHocChip;
+    return totalHocVo + totalChayDAT + totalSaHinh;
   }
 }

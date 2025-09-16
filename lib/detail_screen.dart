@@ -182,12 +182,10 @@ class _DetailScreenState extends State<DetailScreen> {
                   hocVo: profile?.hocVo,
                   chayDAT: profile?.chayDAT,
                   saHinh: profile?.saHinh,
-                  hocChip: profile?.hocChip,
                 )} giờ - ${Utils.getTotalKm(
                   hocVo: profile?.hocVo,
                   chayDAT: profile?.chayDAT,
                   saHinh: profile?.saHinh,
-                  hocChip: profile?.hocChip,
                 )} km)',
                 style: const TextStyle(
                   fontSize: 16,
