@@ -32,6 +32,7 @@ class AppColors {
   Color get purple700 => const Color(0xFF5925dc);
   Color get purple800 => const Color(0xFF4a1fb8);
   Color get purple900 => const Color(0xFF3e1c96);
+  Color get purple=> const Color(0xFF795FFC);
 
   // Success (Green)
   Color get success25 => const Color(0xFFf6fef9);

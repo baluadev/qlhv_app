@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'models/profile_model.dart';
-import 'extentions.dart';
+import 'helper/extentions.dart';
 
 class TraGopAdd extends StatefulWidget {
   final String title;
