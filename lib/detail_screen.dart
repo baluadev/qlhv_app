@@ -229,7 +229,25 @@ class _DetailScreenState extends State<DetailScreen> {
             ),
             ExpansionTile(
               title: const Text(
-                '5. Thông tin bổ sung',
+                '5. Thi sát hạch',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              expandedAlignment: Alignment.centerLeft,
+              expandedCrossAxisAlignment: CrossAxisAlignment.start,
+              childrenPadding: const EdgeInsets.only(left: 20),
+              iconColor: Colors.green,
+              children: [
+                SatHachTable(
+                  data: profile?.satHachTimes ?? [],
+                ),
+              ],
+            ),
+            ExpansionTile(
+              title: const Text(
+                '6. Thông tin bổ sung',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -446,6 +464,52 @@ class TraGopTable extends StatelessWidget {
               ]),
         ],
       ),
+    );
+  }
+}
+
+class SatHachTable extends StatelessWidget {
+  final List<SatHachTime> data;
+
+  const SatHachTable({super.key, required this.data});
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal, // nếu bảng rộng
+      child: DataTable(
+          dataRowMaxHeight: 30,
+          dataRowMinHeight: 30,
+          headingRowHeight: 30,
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey),
+          ),
+          border: TableBorder(
+            horizontalInside: BorderSide(color: Colors.grey.shade300),
+            verticalInside: BorderSide(color: Colors.grey.shade300),
+          ),
+          columns: const [
+            DataColumn(label: Text("Ngày")),
+            DataColumn(label: Text("Lý thuyết")),
+            DataColumn(label: Text("Mô phỏng")),
+            DataColumn(label: Text("Sa hình")),
+            DataColumn(label: Text("Đường trường")),
+          ],
+          rows: [
+            ...data.map(
+              (row) => DataRow(cells: [
+                DataCell(Center(child: Text('${row.date}'))),
+                DataCell(
+                    Center(child: Text(Status.values[row.lyThuyet ?? 2].text))),
+                DataCell(
+                    Center(child: Text(Status.values[row.moPhong ?? 2].text))),
+                DataCell(
+                    Center(child: Text(Status.values[row.saHinh ?? 2].text))),
+                DataCell(Center(
+                    child: Text(Status.values[row.duongTruong ?? 2].text))),
+              ]),
+            ),
+          ]),
     );
   }
 }

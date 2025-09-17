@@ -78,11 +78,7 @@ class UuDaiTime {
   final String? content;
   final bool? checked;
 
-  UuDaiTime({
-    this.title,
-    this.content,
-    this.checked
-  });
+  UuDaiTime({this.title, this.content, this.checked});
 
   /// Convert từ Map (json) sang RowTime
   factory UuDaiTime.fromJson(Map<String, dynamic> json) {
@@ -105,6 +101,49 @@ class UuDaiTime {
   @override
   String toString() {
     return 'UuDaiTime(title: $title, content: $content, checked: $checked)';
+  }
+}
+
+class SatHachTime {
+  final String? date;
+  final int? lyThuyet;
+  final int? moPhong;
+  final int? saHinh;
+  final int? duongTruong;
+
+  SatHachTime({
+    this.date,
+    this.lyThuyet,
+    this.moPhong,
+    this.saHinh,
+    this.duongTruong,
+  });
+
+  /// Convert từ Map (json) sang RowTime
+  factory SatHachTime.fromJson(Map<String, dynamic> json) {
+    return SatHachTime(
+      date: json['date'] as String?,
+      lyThuyet: json['lyThuyet'] as int?,
+      moPhong: json['moPhong'] as int?,
+      saHinh: json['saHinh'] as int?,
+      duongTruong: json['duongTruong'] as int?,
+    );
+  }
+
+  /// Convert RowTime sang Map (json)
+  Map<String, dynamic> toJson() {
+    return {
+      'date': date,
+      'lyThuyet': lyThuyet,
+      'moPhong': moPhong,
+      'saHinh': saHinh,
+      'duongTruong': duongTruong,
+    };
+  }
+
+  @override
+  String toString() {
+    return 'SatHachTime(date: $date, lyThuyet: $lyThuyet, moPhong: $moPhong, saHinh: $saHinh, duongTruong: $duongTruong)';
   }
 }
 
@@ -134,6 +173,7 @@ class ProfileModel {
   final List<RowTime>? hocChip;
   final int? thiTotNghiep;
   final String? ngayTotNghiep;
+  final List<SatHachTime>? satHachTimes;
   final List<UuDaiTime>? uudai;
   final String? note;
   ProfileModel({
@@ -160,6 +200,7 @@ class ProfileModel {
     this.chayDAT,
     this.saHinh,
     this.hocChip,
+    this.satHachTimes,
     this.thiTotNghiep,
     this.uudai,
     this.note,
@@ -202,6 +243,9 @@ class ProfileModel {
           ?.map((e) => RowTime.fromJson(e as Map<String, dynamic>))
           .toList(),
       thiTotNghiep: json['thiTotNghiep'] as int?,
+      satHachTimes: (json['satHachTimes'] as List<dynamic>?)
+          ?.map((e) => SatHachTime.fromJson(e as Map<String, dynamic>))
+          .toList(),
       uudai: (json['uudai'] as List<dynamic>?)
           ?.map((e) => UuDaiTime.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -235,6 +279,7 @@ class ProfileModel {
       'chayDAT': chayDAT?.map((e) => e.toJson()).toList(),
       'saHinh': saHinh?.map((e) => e.toJson()).toList(),
       'hocChip': hocChip?.map((e) => e.toJson()).toList(),
+      'satHachTimes': satHachTimes?.map((e) => e.toJson()).toList(),
       'thiTotNghiep': thiTotNghiep,
       'uudai': uudai?.map((e) => e.toJson()).toList(),
       'note': note,

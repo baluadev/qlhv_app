@@ -127,3 +127,26 @@ enum Status implements HasText {
     }
   }
 }
+
+enum SatHach implements HasText {
+  lyThuyet,
+  moPhong,
+  saHinh,
+  duongTruong;
+
+  @override
+  String get text {
+    switch (this) {
+      case SatHach.lyThuyet:
+        return 'Lý thuyết';
+      case SatHach.moPhong:
+        return 'Mô phỏng';
+      case SatHach.saHinh:
+        return 'Sa Hình';
+      case SatHach.duongTruong:
+        return 'Đường Trường';
+      default:
+        return '';
+    }
+  }
+}
