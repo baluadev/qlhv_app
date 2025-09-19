@@ -60,4 +60,17 @@ class UserModel extends ChangeNotifier {
     );
     return await LocalStore.inst.addUser(user.toString());
   }
+
+  Future thongke() async {
+    final userId = LocalStore.inst.getUser()?.id ?? '';
+    var url = Const.isDebug
+        ? Uri.http(Const.baseUrl, 'qlhv-car/us-central1/api/thongke/$userId')
+        : Uri.https(Const.baseUrl, 'thongke/$userId');
+        print(url);
+    final resp = await http.get(url);
+    
+    // final data = json.decode(resp.body);
+    print('===========');
+    print(resp.body);
+  }
 }
