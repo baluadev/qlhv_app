@@ -395,4 +395,30 @@ class ProfileModel {
       return null;
     }
   }
+
+  Future<List<ProfileModel>> listProfile() async {
+    final userId = LocalStore.inst.getUser()?.id ?? '';
+    try {
+      final url = Const.isDebug
+          ? Uri.http(Const.baseUrl, 'qlhv-car/us-central1/api/profile/$userId')
+          : Uri.https(
+              Const.baseUrl,
+              'profile/$userId',
+            );
+      final resp = await http.get(url);
+      final data = json.decode(resp.body);
+      print('----$data');
+      if (resp.statusCode != 200) {
+        final message = data['message'] ?? "Có lỗi xảy ra";
+        DialogHelper.showToast(message);
+        return [];
+      }
+
+      final results = data['profiles'] as List<dynamic>;
+      return results.map((e) => ProfileModel.fromJson(e)).toList();
+    } catch (e) {
+      print(e);
+      return [];
+    }
+  }
 }

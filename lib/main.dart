@@ -9,6 +9,7 @@ import 'package:qlhv_app/services/local_store.dart';
 import 'package:qlhv_app/stats_screen.dart';
 
 import 'helper/navigation_service.dart';
+import 'profile_list.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -75,7 +76,8 @@ class MyApp extends StatelessWidget {
         '/home': (_) => const HomeScreen(),
         '/detail': (_) => const DetailScreen(),
         '/add': (_) => const AddProfileScreen(),
-        '/stats': (_)=> const StatsScreen(),
+        '/stats': (_) => StatsScreen(userModel: userModel),
+        '/list': (_)=> const ProfileListScreen(),
       },
     );
   }

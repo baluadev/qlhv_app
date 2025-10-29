@@ -40,12 +40,14 @@ class UserModel extends ChangeNotifier {
 
   Future<bool> login(username, password) async {
     var url = Const.isDebug
-        ? Uri.http(Const.baseUrl, 'qlhv-car/us-central1/api/login')
+        ? Uri.http(Const.baseUrl, 'qlhv-gplx/us-central1/api/login')
         : Uri.https(Const.baseUrl, 'login');
+    print(url);
     final resp = await http.post(url, body: {
       'username': username,
       'password': password,
     });
+    print(resp.body);
     final data = json.decode(resp.body);
     if (resp.statusCode != 200) {
       final message = data['message'];
@@ -61,16 +63,15 @@ class UserModel extends ChangeNotifier {
     return await LocalStore.inst.addUser(user.toString());
   }
 
-  Future thongke() async {
+  Future<Map> thongke() async {
     final userId = LocalStore.inst.getUser()?.id ?? '';
     var url = Const.isDebug
-        ? Uri.http(Const.baseUrl, 'qlhv-car/us-central1/api/thongke/$userId')
+        ? Uri.http(Const.baseUrl, 'qlhv-gplx/us-central1/api/thongke/$userId')
         : Uri.https(Const.baseUrl, 'thongke/$userId');
-        print(url);
+    print(url);
     final resp = await http.get(url);
-    
-    // final data = json.decode(resp.body);
-    print('===========');
-    print(resp.body);
+
+    final data = json.decode(resp.body);
+    return data['thongke'];
   }
 }
