@@ -6,6 +6,7 @@ import 'package:qlhv_app/home.dart';
 import 'package:qlhv_app/login.dart';
 import 'package:qlhv_app/models/user_model.dart';
 import 'package:qlhv_app/services/local_store.dart';
+import 'package:qlhv_app/stats_screen.dart';
 
 import 'helper/navigation_service.dart';
 
@@ -74,6 +75,7 @@ class MyApp extends StatelessWidget {
         '/home': (_) => const HomeScreen(),
         '/detail': (_) => const DetailScreen(),
         '/add': (_) => const AddProfileScreen(),
+        '/stats': (_)=> const StatsScreen(),
       },
     );
   }

@@ -46,6 +46,13 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
+        actions: [
+          IconButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/stats');
+              },
+              icon: const Icon(Icons.bar_chart))
+        ],
         title: const Text(
           'Tìm kiếm',
           style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
