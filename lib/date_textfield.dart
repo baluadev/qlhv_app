@@ -27,6 +27,7 @@ class DateTextField extends StatelessWidget {
           initialDate: DateTime(2000),
           firstDate: DateTime(1900),
           lastDate: DateTime.now(),
+          fieldHintText: "dd/MM/yyyy",
         );
         if (picked != null) {
           controller.text = "${picked.day}/${picked.month}/${picked.year}";

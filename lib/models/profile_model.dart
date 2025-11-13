@@ -368,7 +368,7 @@ class ProfileModel {
 
   Future<ProfileModel?> getProfile(String profileId) async {
     try {
-      print(profileId);
+      print('getProfile $profileId');
       final url = Const.isDebug
           ? Uri.http(
               Const.baseUrl,
@@ -378,6 +378,7 @@ class ProfileModel {
               Const.baseUrl,
               'profile/detail/$profileId',
             );
+            print(url);
       final resp = await http.get(url);
       print(resp.body);
       final data = json.decode(resp.body);
@@ -387,8 +388,9 @@ class ProfileModel {
         DialogHelper.showToast(message);
         return null;
       }
-
       final results = data['profile'];
+ print('results $results');
+
       return ProfileModel.fromJson(results);
     } catch (e) {
       print(e);

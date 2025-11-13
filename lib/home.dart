@@ -73,6 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
               onChanged: (value) {
                 setState(() {});
               },
+              onSubmitted:(value)=> onSearchChanged,
               decoration: InputDecoration(
                 hintText: 'Nhập từ khóa',
                 enabledBorder: const OutlineInputBorder(),
@@ -139,6 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   return GestureDetector(
                     onTap: () async {
+                      print('ssss$item');
                       await Navigator.pushNamed(context, '/detail',
                           arguments: item);
                       onSearchChanged();
